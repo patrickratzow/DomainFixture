@@ -60,4 +60,11 @@ public UserTestConfiguration : TestConfiguration<User>
   }
 }
 ```
-DomainFixture would then generate all the tests according to your specificiations, making it a lot easier & less grunt work to make tests for validation logic.
+DomainFixture would then generate all the tests according to your specificiations, making it a lot easier & less grunt work to make tests for validation logic. The test amount generated would be the following
+- Id = 2 tests
+- Description = 5 tests
+- ContactDetails = 4 tests
+- Enums = 5 tests
+- Projects = 12 tests (4 for each)
+
+That is a staggering total of 28 tests for so little code, and a lot of the tests are inferred via the intent of IsValid and IsInvalid via Boundary Value Analysis. Simply put, it's awesome :)
