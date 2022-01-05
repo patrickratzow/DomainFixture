@@ -1,0 +1,22 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DomainFixture", "DomainFixture\DomainFixture.csproj", "{1443714B-CF39-4213-8113-B50787FE58A6}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DomainFixture.SourceGenerator", "DomainFixture.SourceGenerator\DomainFixture.SourceGenerator.csproj", "{460104EB-A57C-48E7-B7CC-F9DB54344425}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{1443714B-CF39-4213-8113-B50787FE58A6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1443714B-CF39-4213-8113-B50787FE58A6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1443714B-CF39-4213-8113-B50787FE58A6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1443714B-CF39-4213-8113-B50787FE58A6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{460104EB-A57C-48E7-B7CC-F9DB54344425}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{460104EB-A57C-48E7-B7CC-F9DB54344425}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{460104EB-A57C-48E7-B7CC-F9DB54344425}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{460104EB-A57C-48E7-B7CC-F9DB54344425}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
