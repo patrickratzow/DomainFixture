@@ -17,7 +17,7 @@ public class User
 }
 ```
 
-When making tests you would need to make that the User instance is either valid/invalid according to your use case, and that is a major pain the instant any dependency to another object exists.
+When making tests you would need to make sure that the User instance is valid/invalid according to your use case, and that is a major pain the instant any dependency to another object exists.
 
 ## Test Scenarios
 If you were to test just the description property you would have 4 different things to test
