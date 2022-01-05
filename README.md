@@ -38,7 +38,8 @@ public UserTestConfiguration : TestConfiguration<User>
   protected override void Configure()
   {
     // default (0) is invalid, but 1 or -1 would be valid
-    Property(x => x.Id).Empty().IsInvalid();
+    Property(x => x.Id)
+      .Empty().IsInvalid();
     
     // Length 4-4096 is valid, but a string with the length of 4 consisting of just whitespaces wouldn't be valid
     Property(x => x.Description)
@@ -56,7 +57,6 @@ public UserTestConfiguration : TestConfiguration<User>
       .When(x => x.Subscription, Subscription.Free).Count(0, 3).IsValid()
       .When(x => x.Subscription, Subscription.Premium).Count(0, 25).IsValid();
       .When(x => x.Subscription, Subscription.Enterprise).Count(0, 100).IsValid();
-    
   }
 }
 ```
