@@ -33,7 +33,7 @@ Instead of having to create the objects yourself, you can use this library to se
 
 A hypothethical way that could look in code is
 ```cs
-public EmployeeTestConfiguration : TestConfiguration<Employee>
+public UserTestConfiguration : TestConfiguration<User>
 {
   protected override void Configure()
   {
