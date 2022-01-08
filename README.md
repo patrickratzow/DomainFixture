@@ -1,4 +1,4 @@
-## **This is just an initial MVP prototype to test the concept! The non prototype can be found on the development branch*
+## *This is just an initial MVP prototype to test the concept! The non prototype can be found on the development branch*
 
 # DomainFixture
 C# fixture library for creating domain entities & value objects in valid/invalid states.
