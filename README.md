@@ -1,4 +1,4 @@
-## **This is just an initial dirty prototype to test the concept! It will be rewritten later to make greater use of C# Source Generators, and to incorporate a lot more features**
+## **This is just an initial MVP prototype to test the concept! The non prototype can be found on the development branch*
 
 # DomainFixture
 C# fixture library for creating domain entities & value objects in valid/invalid states.
