@@ -6,7 +6,7 @@ namespace DomainFixture.FixtureConfigurations;
 
 public class FixtureConfigurationBuilder<TClass> : IFixtureConfigurationBuilder<TClass>
 {
-    internal List<IFixturePropertyBuilder<TClass>> PropertyBuilders = new();
+    internal readonly List<IFixturePropertyBuilder<TClass>> PropertyBuilders = new();
     
     public IFixturePropertyBuilder<TClass, TProperty> Property<TProperty>(
         Expression<Func<TClass, TProperty>> propertyExpression)
