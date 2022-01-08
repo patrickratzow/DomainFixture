@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="4b85ba2c-5b77-4697-ac23-b790ca681b81" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/.idea/.idea.DomainFixture/.idea/discord.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/.idea.DomainFixture/.idea/encodings.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/.idea.DomainFixture/.idea/workspace.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/DomainFixture.SourceGenerator/DomainFixture.SourceGenerator.csproj" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/DomainFixture/Conventions/IConvention.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/DomainFixture/DomainFixture.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/DomainFixture/DomainFixture.csproj" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/DomainFixture/FixtureBuilder/IFixtureBuilder.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/DomainFixture/FixtureConfigurations/FixtureConfigurationBuilder.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/DomainFixture/FixtureConfigurations/FixtureState.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/DomainFixture/FixtureConfigurations/IFixtureConfiguration.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/DomainFixture/FixtureConfigurations/IFixtureConfigurationBuilder.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/DomainFixture/FixtureConfigurations/IFixturePropertyBuilder.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/tests/DomainFixture.Tests.Domain/DomainFixture.Tests.Domain.csproj" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/tests/DomainFixture.Tests.Domain/Entities/BaseEntity.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/tests/DomainFixture.Tests.Domain/Entities/User.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/tests/DomainFixture.Tests.Domain/Validatable.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/tests/DomainFixture.Tests.Domain/ValueObjects/EmailAddress.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/tests/DomainFixture.Tests.Domain/ValueObjects/Username.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/tests/DomainFixture.Tests.Domain/ValueObjects/ValueOf.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/tests/DomainFixture.Tests/DomainFixture.Tests.csproj" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/tests/DomainFixture.Tests/FixtureConfigurations/UserConfiguration.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/tests/DomainFixture.Tests/Fixtures/FixtureBuilderTests.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/tests/DomainFixture.Tests/Fixtures/FixturePropertyBuilderTests.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/tests/DomainFixture.Tests/Fixtures/UserConfigurationTests.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/DomainFixture.SourceGenerator/CodeBuilder.cs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/DomainFixture.SourceGenerator/DomainFixture.SourceGenerator.csproj" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/DomainFixture.SourceGenerator/DomainFixture.SourceGenerator.csproj.DotSettings" beforeDir="false" afterPath="$PROJECT_DIR$/src/DomainFixture/DomainFixture.csproj.DotSettings" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/DomainFixture.sln" beforeDir="false" afterPath="$PROJECT_DIR$/DomainFixture.sln" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/DomainFixture/DomainFixture.csproj" beforeDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_BRANCH_BY_REPOSITORY">
+      <map>
+        <entry key="$PROJECT_DIR$" value="master" />
+      </map>
+    </option>
+  </component>
+  <component name="MarkdownSettingsMigration">
+    <option name="stateVersion" value="1" />
+  </component>
+  <component name="ProjectId" id="23GT9yBtr2BnAL7aFXRiEQEKvkI" />
+  <component name="ProjectLevelVcsManager">
+    <ConfirmationsSetting value="2" id="Add" />
+  </component>
+  <component name="ProjectViewState">
+    <option name="autoscrollFromSource" value="true" />
+    <option name="autoscrollToSource" value="true" />
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">
+    <property name="ASKED_ADD_EXTERNAL_FILES" value="true" />
+    <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
+    <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
+    <property name="WebServerToolWindowFactoryState" value="false" />
+    <property name="android.sdk.path" value="$USER_HOME$/AppData/Local/Android/Sdk" />
+    <property name="node.js.detected.package.eslint" value="true" />
+    <property name="node.js.detected.package.tslint" value="true" />
+    <property name="node.js.selected.package.eslint" value="(autodetect)" />
+    <property name="node.js.selected.package.tslint" value="(autodetect)" />
+    <property name="settings.editor.selected.configurable" value="AndroidSettingsPageId" />
+    <property name="vue.rearranger.settings.migration" value="true" />
+  </component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="4b85ba2c-5b77-4697-ac23-b790ca681b81" name="Changes" comment="" />
+      <created>1641359278268</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1641359278268</updated>
+      <workItem from="1641359283230" duration="1665000" />
+      <workItem from="1641622080064" duration="33000" />
+      <workItem from="1641622170113" duration="313000" />
+    </task>
+    <task id="LOCAL-00001" summary="Initial commit">
+      <created>1641359379241</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1641359379241</updated>
+    </task>
+    <task id="LOCAL-00002" summary="chore: remove old code">
+      <created>1641367239292</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1641367239292</updated>
+    </task>
+    <option name="localTasksCounter" value="3" />
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+  <component name="UnityCheckinConfiguration" checkUnsavedScenes="true" />
+  <component name="UnityProjectConfiguration" hasMinimizedUI="false" />
+  <component name="UnityUnitTestConfiguration" currentTestLauncher="NUnit" />
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
+  <component name="VcsManagerConfiguration">
+    <option name="CHECK_NEW_TODO" value="false" />
+    <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
+    <option name="CLEAR_INITIAL_COMMIT_MESSAGE" value="true" />
+    <MESSAGE value="Initial commit" />
+    <MESSAGE value="chore: remove old code" />
+    <option name="LAST_COMMIT_MESSAGE" value="chore: remove old code" />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" type="DotNet Breakpoints">
+          <url>file://$PROJECT_DIR$/DomainFixture/TestConfiguration/TestConfiguration.cs</url>
+          <line>3</line>
+          <properties documentPath="C:\Users\patri\Desktop\Sandbox\DomainFixtureMVP\DomainFixture\DomainFixture\TestConfiguration\TestConfiguration.cs" initialLine="3" isMultiMethodBreakpoint="true">
+            <option name="multiMethodBreakpoint" value="true" />
+          </properties>
+          <option name="timeStamp" value="1" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
+  </component>
+</project>

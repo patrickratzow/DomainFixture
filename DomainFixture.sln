@@ -1,8 +1,16 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DomainFixture", "DomainFixture\DomainFixture.csproj", "{1443714B-CF39-4213-8113-B50787FE58A6}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DomainFixture", "src\DomainFixture\DomainFixture.csproj", "{1443714B-CF39-4213-8113-B50787FE58A6}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DomainFixture.SourceGenerator", "DomainFixture.SourceGenerator\DomainFixture.SourceGenerator.csproj", "{460104EB-A57C-48E7-B7CC-F9DB54344425}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DomainFixture.SourceGenerator", "src\DomainFixture.SourceGenerator\DomainFixture.SourceGenerator.csproj", "{460104EB-A57C-48E7-B7CC-F9DB54344425}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{33C9782A-06C3-45F1-99F8-67A2B2EF8696}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{2BF82380-38D7-45EC-809C-CE0654AD6798}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DomainFixture.Tests", "tests\DomainFixture.Tests\DomainFixture.Tests.csproj", "{557E054D-79A1-496E-BBAB-A91CC534DE52}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DomainFixture.Tests.Domain", "tests\DomainFixture.Tests.Domain\DomainFixture.Tests.Domain.csproj", "{1EBC6459-3989-42B9-87BD-035466D8FD14}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -18,5 +26,19 @@ Global
 		{460104EB-A57C-48E7-B7CC-F9DB54344425}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{460104EB-A57C-48E7-B7CC-F9DB54344425}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{460104EB-A57C-48E7-B7CC-F9DB54344425}.Release|Any CPU.Build.0 = Release|Any CPU
+		{557E054D-79A1-496E-BBAB-A91CC534DE52}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{557E054D-79A1-496E-BBAB-A91CC534DE52}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{557E054D-79A1-496E-BBAB-A91CC534DE52}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{557E054D-79A1-496E-BBAB-A91CC534DE52}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1EBC6459-3989-42B9-87BD-035466D8FD14}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1EBC6459-3989-42B9-87BD-035466D8FD14}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1EBC6459-3989-42B9-87BD-035466D8FD14}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1EBC6459-3989-42B9-87BD-035466D8FD14}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{1443714B-CF39-4213-8113-B50787FE58A6} = {33C9782A-06C3-45F1-99F8-67A2B2EF8696}
+		{460104EB-A57C-48E7-B7CC-F9DB54344425} = {33C9782A-06C3-45F1-99F8-67A2B2EF8696}
+		{557E054D-79A1-496E-BBAB-A91CC534DE52} = {2BF82380-38D7-45EC-809C-CE0654AD6798}
+		{1EBC6459-3989-42B9-87BD-035466D8FD14} = {2BF82380-38D7-45EC-809C-CE0654AD6798}
 	EndGlobalSection
 EndGlobal
