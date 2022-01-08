@@ -4,37 +4,14 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="4b85ba2c-5b77-4697-ac23-b790ca681b81" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/.idea/.idea.DomainFixture/.idea/discord.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/.idea.DomainFixture/.idea/encodings.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/.idea.DomainFixture/.idea/workspace.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/DomainFixture.SourceGenerator/DomainFixture.SourceGenerator.csproj" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/DomainFixture/Conventions/IConvention.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/DomainFixture/DomainFixture.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/DomainFixture/DomainFixture.csproj" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/DomainFixture/FixtureBuilder/IFixtureBuilder.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/DomainFixture/FixtureConfigurations/FixtureConfigurationBuilder.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/DomainFixture/FixtureConfigurations/FixtureState.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/DomainFixture/FixtureConfigurations/IFixtureConfiguration.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/DomainFixture/FixtureConfigurations/IFixtureConfigurationBuilder.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/DomainFixture/FixtureConfigurations/IFixturePropertyBuilder.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/tests/DomainFixture.Tests.Domain/DomainFixture.Tests.Domain.csproj" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/tests/DomainFixture.Tests.Domain/Entities/BaseEntity.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/tests/DomainFixture.Tests.Domain/Entities/User.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/tests/DomainFixture.Tests.Domain/Validatable.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/tests/DomainFixture.Tests.Domain/ValueObjects/EmailAddress.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/tests/DomainFixture.Tests.Domain/ValueObjects/Username.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/tests/DomainFixture.Tests.Domain/ValueObjects/ValueOf.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/tests/DomainFixture.Tests/DomainFixture.Tests.csproj" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/tests/DomainFixture.Tests/FixtureConfigurations/UserConfiguration.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/tests/DomainFixture.Tests/Fixtures/FixtureBuilderTests.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/tests/DomainFixture.Tests/Fixtures/FixturePropertyBuilderTests.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/tests/DomainFixture.Tests/Fixtures/UserConfigurationTests.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/DomainFixture.SourceGenerator/CodeBuilder.cs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/DomainFixture.SourceGenerator/DomainFixture.SourceGenerator.csproj" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/DomainFixture.SourceGenerator/DomainFixture.SourceGenerator.csproj.DotSettings" beforeDir="false" afterPath="$PROJECT_DIR$/src/DomainFixture/DomainFixture.csproj.DotSettings" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/DomainFixture.sln" beforeDir="false" afterPath="$PROJECT_DIR$/DomainFixture.sln" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/DomainFixture/DomainFixture.csproj" beforeDir="false" />
+    <list default="true" id="4b85ba2c-5b77-4697-ac23-b790ca681b81" name="Changes" comment="fix(tests): remove old dependency">
+      <change afterPath="$PROJECT_DIR$/src/DomainFixture/Extensions/TypeExtensions.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/DomainFixture/FixtureConfigurations/FixtureConfigurationFactory.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/DomainFixture/FixtureConfigurations/IFixtureConfigurationScanner.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/tests/DomainFixture.Tests/FixtureConfigurationFactoryTests.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/tests/DomainFixture.Tests/FixtureConfigurationScannerTests.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/.idea.DomainFixture/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.DomainFixture/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tests/DomainFixture.Tests/Fixtures/FixturePropertyBuilderTests.cs" beforeDir="false" afterPath="$PROJECT_DIR$/tests/DomainFixture.Tests/Fixtures/FixturePropertyBuilderTests.cs" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -84,7 +61,7 @@
       <updated>1641359278268</updated>
       <workItem from="1641359283230" duration="1665000" />
       <workItem from="1641622080064" duration="33000" />
-      <workItem from="1641622170113" duration="313000" />
+      <workItem from="1641622170113" duration="3610000" />
     </task>
     <task id="LOCAL-00001" summary="Initial commit">
       <created>1641359379241</created>
@@ -100,7 +77,21 @@
       <option name="project" value="LOCAL" />
       <updated>1641367239292</updated>
     </task>
-    <option name="localTasksCounter" value="3" />
+    <task id="LOCAL-00003" summary="feat: initial work on v2">
+      <created>1641622510922</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1641622510922</updated>
+    </task>
+    <task id="LOCAL-00004" summary="fix(tests): remove old dependency">
+      <created>1641622562475</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1641622562475</updated>
+    </task>
+    <option name="localTasksCounter" value="5" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -126,7 +117,9 @@
     <option name="CLEAR_INITIAL_COMMIT_MESSAGE" value="true" />
     <MESSAGE value="Initial commit" />
     <MESSAGE value="chore: remove old code" />
-    <option name="LAST_COMMIT_MESSAGE" value="chore: remove old code" />
+    <MESSAGE value="feat: initial work on v2" />
+    <MESSAGE value="fix(tests): remove old dependency" />
+    <option name="LAST_COMMIT_MESSAGE" value="fix(tests): remove old dependency" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -138,6 +131,19 @@
             <option name="multiMethodBreakpoint" value="true" />
           </properties>
           <option name="timeStamp" value="1" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="DotNet Breakpoints">
+          <url>file://$PROJECT_DIR$/tests/DomainFixture.Tests/FixtureConfigurationFactoryTests.cs</url>
+          <line>41</line>
+          <properties documentPath="C:\Users\patri\Desktop\Sandbox\DomainFixtureMVP\DomainFixture\tests\DomainFixture.Tests\FixtureConfigurationFactoryTests.cs" initialLine="28" containingFunctionPresentation="method 'Factory_ShouldThrow_WhenGivenATypeThatDoesNotImplementIFixtureConfiguration'">
+            <startOffsets>
+              <option value="988" />
+            </startOffsets>
+            <endOffsets>
+              <option value="1011" />
+            </endOffsets>
+          </properties>
+          <option name="timeStamp" value="2" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>
