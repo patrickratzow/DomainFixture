@@ -9,7 +9,7 @@ namespace DomainFixture.Tests;
 [TestFixture]
 public class FixtureConfigurationFactoryTests
 {
-    private record Sut;
+    private record Fixture;
     
     [Test]
     public void Factory_ShouldNotThrow_WhenGivenATypeThatImplementsIFixtureConfiguration()
@@ -39,7 +39,7 @@ public class FixtureConfigurationFactoryTests
     public void Factory_ShouldThrow_WhenGivenATypeThatDoesNotImplementIFixtureConfiguration()
     {
         // Arrange
-        var type = typeof(Sut);
+        var type = typeof(Fixture);
 
         // Act
         var result = () => FixtureConfigurationFactory.Create(type);

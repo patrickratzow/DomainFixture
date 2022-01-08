@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Linq;
+﻿using System.Linq;
 using DomainFixture.FixtureConfigurations;
 using FluentAssertions;
 using NUnit.Framework;
@@ -9,8 +8,8 @@ namespace DomainFixture.Tests.Fixtures;
 [TestFixture]
 public class UserConfigurationTests
 {
-    private FixtureConfiguration _config;
-    private FixtureConfigurationBuilder<Fixture> _configBuilder;
+    private FixtureConfiguration _config = null!;
+    private FixtureConfigurationBuilder<Fixture> _configBuilder = null!;
     private record Fixture(int Foo1, int Foo2, int Foo3, int Foo4, int Foo5);
     private class FixtureConfiguration : IFixtureConfiguration<Fixture>
     {

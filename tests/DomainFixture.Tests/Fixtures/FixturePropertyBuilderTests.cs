@@ -7,13 +7,13 @@ namespace DomainFixture.Tests.Fixtures;
 [TestFixture]
 public class FixturePropertyBuilderTests
 {
-    private record Sut(string Name);
+    private record Fixture(string Name);
 
     [Test]
     public void Constructor_ShouldSetNameToExpression_WhenNameIsNull()
     {
         // Act
-        var propertyBuilder = new FixturePropertyBuilder<Sut, string>(x => x.Name);
+        var propertyBuilder = new FixturePropertyBuilder<Fixture, string>(x => x.Name);
 
         // Assert
         propertyBuilder.Name.Should().Be("x => x.Name");
@@ -26,7 +26,7 @@ public class FixturePropertyBuilderTests
         var name = "Username";
 
         // Act
-        var propertyBuilder = new FixturePropertyBuilder<Sut, string>(x => x.Name, name);
+        var propertyBuilder = new FixturePropertyBuilder<Fixture, string>(x => x.Name, name);
 
         // Assert
         propertyBuilder.Name.Should().Be(name);
@@ -37,7 +37,7 @@ public class FixturePropertyBuilderTests
     {
         // Arrange
         var name = "Baksling";
-        var propertyBuilder = new FixturePropertyBuilder<Sut, string>(x => x.Name);
+        var propertyBuilder = new FixturePropertyBuilder<Fixture, string>(x => x.Name);
         
         // Act
         propertyBuilder.Valid(name, name);
@@ -58,7 +58,7 @@ public class FixturePropertyBuilderTests
     {
         // Arrange
         var name = "Baksling";
-        var propertyBuilder = new FixturePropertyBuilder<Sut, string>(x => x.Name);
+        var propertyBuilder = new FixturePropertyBuilder<Fixture, string>(x => x.Name);
         
         // Act
         propertyBuilder.Invalid(name, name);
