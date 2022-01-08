@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq.Expressions;
 
-namespace DomainFixture;
+namespace DomainFixture.FixtureBuilder;
 
 public interface IFixtureBuilder<TFixture>
 {

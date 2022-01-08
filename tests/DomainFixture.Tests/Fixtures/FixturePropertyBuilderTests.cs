@@ -16,7 +16,7 @@ public class FixturePropertyBuilderTests
         var propertyBuilder = new FixturePropertyBuilder<Fixture, string>(x => x.Name);
 
         // Assert
-        propertyBuilder.Name.Should().Be("x => x.Name");
+        propertyBuilder.Name.Should().Be("Name");
     }
 
     [Test]

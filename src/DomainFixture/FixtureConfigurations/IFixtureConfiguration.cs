@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-
-namespace DomainFixture.FixtureConfigurations;
+﻿namespace DomainFixture.FixtureConfigurations;
 
 public interface IFixtureConfiguration
 {

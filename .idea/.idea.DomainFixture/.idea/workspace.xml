@@ -4,13 +4,22 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="4b85ba2c-5b77-4697-ac23-b790ca681b81" name="Changes" comment="fix(tests): remove old dependency">
-      <change afterPath="$PROJECT_DIR$/src/DomainFixture/Extensions/TypeExtensions.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/DomainFixture/FixtureConfigurations/FixtureConfigurationFactory.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/DomainFixture/FixtureConfigurations/IFixtureConfigurationScanner.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/tests/DomainFixture.Tests/FixtureConfigurationFactoryTests.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/tests/DomainFixture.Tests/FixtureConfigurationScannerTests.cs" afterDir="false" />
+    <list default="true" id="4b85ba2c-5b77-4697-ac23-b790ca681b81" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/src/DomainFixture.TestGenerator/DomainFixture.TestGenerator.csproj" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/DomainFixture.TestGenerator/TestNameBuilder.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/DomainFixture/FixtureConfigurations/FixtureConfigurationScanner.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/DomainFixture/FixtureConfigurations/FixturePropertyBuilder.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/DomainFixture/FixtureConfigurations/GenericScenario.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/DomainFixture/FixtureConfigurations/IScenario.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/.idea.DomainFixture/.idea/discord.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.DomainFixture/.idea/discord.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/.idea.DomainFixture/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.DomainFixture/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/DomainFixture.sln" beforeDir="false" afterPath="$PROJECT_DIR$/DomainFixture.sln" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/DomainFixture/DomainFixture.cs" beforeDir="false" afterPath="$PROJECT_DIR$/src/DomainFixture/DomainFixture.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/DomainFixture/DomainFixture.csproj" beforeDir="false" afterPath="$PROJECT_DIR$/src/DomainFixture/DomainFixture.csproj" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/DomainFixture/FixtureBuilder/IFixtureBuilder.cs" beforeDir="false" afterPath="$PROJECT_DIR$/src/DomainFixture/FixtureBuilder/IFixtureBuilder.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/DomainFixture/FixtureConfigurations/IFixtureConfiguration.cs" beforeDir="false" afterPath="$PROJECT_DIR$/src/DomainFixture/FixtureConfigurations/IFixtureConfiguration.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/DomainFixture/FixtureConfigurations/IFixtureConfigurationScanner.cs" beforeDir="false" afterPath="$PROJECT_DIR$/src/DomainFixture/FixtureConfigurations/IFixtureConfigurationScanner.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/DomainFixture/FixtureConfigurations/IFixturePropertyBuilder.cs" beforeDir="false" afterPath="$PROJECT_DIR$/src/DomainFixture/FixtureConfigurations/IFixturePropertyBuilder.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/tests/DomainFixture.Tests/Fixtures/FixturePropertyBuilderTests.cs" beforeDir="false" afterPath="$PROJECT_DIR$/tests/DomainFixture.Tests/Fixtures/FixturePropertyBuilderTests.cs" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -24,6 +33,17 @@
         <entry key="$PROJECT_DIR$" value="master" />
       </map>
     </option>
+  </component>
+  <component name="GitSEFilterConfiguration">
+    <file-type-list>
+      <filtered-out-file-type name="LOCAL_BRANCH" />
+      <filtered-out-file-type name="REMOTE_BRANCH" />
+      <filtered-out-file-type name="TAG" />
+      <filtered-out-file-type name="COMMIT_BY_MESSAGE" />
+    </file-type-list>
+  </component>
+  <component name="HighlightingSettingsPerFile">
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/SourcesCache/29e6da7b1ea34048d53e548a82283c6cf956de2551d5c8b7e9201273372340a/LateBoundTestFramework.cs" root0="SKIP_HIGHLIGHTING" />
   </component>
   <component name="MarkdownSettingsMigration">
     <option name="stateVersion" value="1" />
@@ -51,6 +71,7 @@
     <property name="settings.editor.selected.configurable" value="AndroidSettingsPageId" />
     <property name="vue.rearranger.settings.migration" value="true" />
   </component>
+  <component name="RunManager" selected="22a726cb-a2e6-4d33-8b7e-f7c0a1e34c60" />
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
   <component name="TaskManager">
     <task active="true" id="Default" summary="Default task">
@@ -61,7 +82,8 @@
       <updated>1641359278268</updated>
       <workItem from="1641359283230" duration="1665000" />
       <workItem from="1641622080064" duration="33000" />
-      <workItem from="1641622170113" duration="3610000" />
+      <workItem from="1641622170113" duration="16157000" />
+      <workItem from="1641648180999" duration="6154000" />
     </task>
     <task id="LOCAL-00001" summary="Initial commit">
       <created>1641359379241</created>
@@ -91,7 +113,35 @@
       <option name="project" value="LOCAL" />
       <updated>1641622562475</updated>
     </task>
-    <option name="localTasksCounter" value="5" />
+    <task id="LOCAL-00005" summary="feat: add configuration scanner &amp; corresponding factory">
+      <created>1641628228915</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1641628228915</updated>
+    </task>
+    <task id="LOCAL-00006" summary="test: tests for UserConfiguration and more FixtureBuilderTests">
+      <created>1641635323211</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1641635323211</updated>
+    </task>
+    <task id="LOCAL-00007" summary="refactor: make FixtureConfigurationBuilder`1.PropertyBuilder readonly">
+      <created>1641635341832</created>
+      <option name="number" value="00007" />
+      <option name="presentableId" value="LOCAL-00007" />
+      <option name="project" value="LOCAL" />
+      <updated>1641635341832</updated>
+    </task>
+    <task id="LOCAL-00008" summary="refactor: better naming">
+      <created>1641640907816</created>
+      <option name="number" value="00008" />
+      <option name="presentableId" value="LOCAL-00008" />
+      <option name="project" value="LOCAL" />
+      <updated>1641640907816</updated>
+    </task>
+    <option name="localTasksCounter" value="9" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -119,7 +169,11 @@
     <MESSAGE value="chore: remove old code" />
     <MESSAGE value="feat: initial work on v2" />
     <MESSAGE value="fix(tests): remove old dependency" />
-    <option name="LAST_COMMIT_MESSAGE" value="fix(tests): remove old dependency" />
+    <MESSAGE value="feat: add configuration scanner &amp; corresponding factory" />
+    <MESSAGE value="test: tests for UserConfiguration and more FixtureBuilderTests" />
+    <MESSAGE value="refactor: make FixtureConfigurationBuilder`1.PropertyBuilder readonly" />
+    <MESSAGE value="refactor: better naming" />
+    <option name="LAST_COMMIT_MESSAGE" value="refactor: better naming" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -133,17 +187,17 @@
           <option name="timeStamp" value="1" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="DotNet Breakpoints">
-          <url>file://$PROJECT_DIR$/tests/DomainFixture.Tests/FixtureConfigurationFactoryTests.cs</url>
-          <line>41</line>
-          <properties documentPath="C:\Users\patri\Desktop\Sandbox\DomainFixtureMVP\DomainFixture\tests\DomainFixture.Tests\FixtureConfigurationFactoryTests.cs" initialLine="28" containingFunctionPresentation="method 'Factory_ShouldThrow_WhenGivenATypeThatDoesNotImplementIFixtureConfiguration'">
+          <url>file://$PROJECT_DIR$/tests/DomainFixture.Tests/Fixtures/FixturePropertyBuilderTests.cs</url>
+          <line>18</line>
+          <properties documentPath="C:\Users\patri\Desktop\Sandbox\DomainFixtureMVP\DomainFixture\tests\DomainFixture.Tests\Fixtures\FixturePropertyBuilderTests.cs" initialLine="18" containingFunctionPresentation="method 'Constructor_ShouldSetNameToExpression_WhenNameIsNull'">
             <startOffsets>
-              <option value="988" />
+              <option value="449" />
             </startOffsets>
             <endOffsets>
-              <option value="1011" />
+              <option value="490" />
             </endOffsets>
           </properties>
-          <option name="timeStamp" value="2" />
+          <option name="timeStamp" value="8" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>

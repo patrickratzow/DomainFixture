@@ -1,4 +1,5 @@
 ﻿using System;
+using DomainFixture.FixtureBuilder;
 
 namespace DomainFixture;
 
