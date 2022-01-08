@@ -8,10 +8,23 @@ namespace DomainFixture.Tests.Fixtures;
 public class FixtureBuilderTests
 {
     [Test]
-    public void Create_CreatesInstanceOfFixture()
+    public void Create_CreatesInstanceOfFixture_WhenUsingValid()
     {
         // Arrange
         var action = () => DomainFixture.Valid<User>().Create();
+
+        // Act
+        var result = action.Invoke();
+        
+        // Assert
+        result.Should().NotBeNull();
+    }
+    
+    [Test]
+    public void Create_CreatesInstanceOfFixture_WhenUsingInvalid()
+    {
+        // Arrange
+        var action = () => DomainFixture.Invalid<User>().Create();
 
         // Act
         var result = action.Invoke();
