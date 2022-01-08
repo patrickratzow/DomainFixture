@@ -17,7 +17,6 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\..\DomainFixture\DomainFixture.csproj" />
       <ProjectReference Include="..\..\src\DomainFixture\DomainFixture.csproj" />
       <ProjectReference Include="..\DomainFixture.Tests.Domain\DomainFixture.Tests.Domain.csproj" />
     </ItemGroup>
