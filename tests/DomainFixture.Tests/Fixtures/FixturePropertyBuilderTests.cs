@@ -12,9 +12,12 @@ public class FixturePropertyBuilderTests
     [Test]
     public void Constructor_ShouldSetNameToExpression_WhenNameIsNull()
     {
+        // Arrange
+        IFixturePropertyBuilder<Fixture, string> propertyBuilder;
+        
         // Act
-        var propertyBuilder = new FixturePropertyBuilder<Fixture, string>(x => x.Name);
-
+        propertyBuilder = new FixturePropertyBuilder<Fixture, string>(x => x.Name);
+            
         // Assert
         propertyBuilder.Name.Should().Be("Name");
     }
@@ -23,10 +26,11 @@ public class FixturePropertyBuilderTests
     public void Constructor_ShouldSetName_WhenExpressionIsNotNull()
     {
         // Arrange
+        IFixturePropertyBuilder<Fixture, string> propertyBuilder;
         var name = "Username";
 
         // Act
-        var propertyBuilder = new FixturePropertyBuilder<Fixture, string>(x => x.Name, name);
+        propertyBuilder = new FixturePropertyBuilder<Fixture, string>(x => x.Name, name);
 
         // Assert
         propertyBuilder.Name.Should().Be(name);
@@ -36,8 +40,9 @@ public class FixturePropertyBuilderTests
     public void Valid_ShouldAddGenericScenario_WhenGivenAnExpression()
     {
         // Arrange
-        var name = "Baksling";
-        var propertyBuilder = new FixturePropertyBuilder<Fixture, string>(x => x.Name);
+        IFixturePropertyBuilder<Fixture, string> propertyBuilder;
+        var name = "Baksling"; 
+        propertyBuilder = new FixturePropertyBuilder<Fixture, string>(x => x.Name);
         
         // Act
         propertyBuilder.Valid(name, name);
@@ -57,8 +62,9 @@ public class FixturePropertyBuilderTests
     public void Invalid_ShouldAddGenericScenario_WhenGivenAnExpression()
     {
         // Arrange
+        IFixturePropertyBuilder<Fixture, string> propertyBuilder;
         var name = "Baksling";
-        var propertyBuilder = new FixturePropertyBuilder<Fixture, string>(x => x.Name);
+        propertyBuilder = new FixturePropertyBuilder<Fixture, string>(x => x.Name);
         
         // Act
         propertyBuilder.Invalid(name, name);

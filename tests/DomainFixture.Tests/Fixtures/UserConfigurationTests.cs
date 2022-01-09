@@ -62,7 +62,7 @@ public class UserConfigurationTests
 
         // Assert
         var scenarios = _configBuilder.PropertyBuilders
-            .Select(x => (FixturePropertyBuilder<Fixture, int>)x)
+            .Select(x => (IFixturePropertyBuilder<Fixture, int>)x)
             .SelectMany(x => x.Scenarios)
             .ToList();
         scenarios.Should().HaveCount(10);

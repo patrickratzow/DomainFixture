@@ -3,7 +3,7 @@
 namespace DomainFixture.TestGenerator;
 
 public class TestNameBuilder<TClass, TProperty, TPropertyBuilder> 
-    where TPropertyBuilder : IFixturePropertyBuilder<TClass, TProperty>
+    where TPropertyBuilder : FixturePropertyBuilder<TClass, TProperty>
 {
     private readonly TPropertyBuilder _propertyBuilder;
 
