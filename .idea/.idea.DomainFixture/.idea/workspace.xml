@@ -4,33 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="4b85ba2c-5b77-4697-ac23-b790ca681b81" name="Changes" comment="refactor: use .NET Standard 2.0">
-      <change afterPath="$PROJECT_DIR$/src/DomainFixture.TestGenerator/CodeBuilder.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/DomainFixture.TestGenerator/Framework/Attribute.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/DomainFixture.TestGenerator/Framework/Framework.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/DomainFixture.TestGenerator/Framework/FrameworkAttributes.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/DomainFixture.TestGenerator/Framework/FrameworkStrategyFactory.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/DomainFixture.TestGenerator/Framework/IFrameworkStrategy.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/DomainFixture.TestGenerator/Framework/Strategies/MSTestStrategy.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/DomainFixture.TestGenerator/Framework/Strategies/NUnitStrategy.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/DomainFixture.TestGenerator/Framework/Strategies/XUnitStrategy.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/DomainFixture.TestGenerator/Indentation.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/DomainFixture.TestGenerator/IsExternalInit.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/DomainFixture.TestGenerator/TestCodeWriter.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/tests/DomainFixture.TestGenerator.Tests/DomainFixture.TestGenerator.Tests.csproj" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/tests/DomainFixture.TestGenerator.Tests/FrameworkStrategyFactoryTests.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/tests/DomainFixture.TestGenerator.Tests/FrameworkStrategyTests.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/tests/DomainFixture.TestGenerator.Tests/UnitTest1.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/tests/DomainFixture.Tests/PropertyExpressionServiceTests.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/.idea.DomainFixture/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.DomainFixture/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/DomainFixture.sln" beforeDir="false" afterPath="$PROJECT_DIR$/DomainFixture.sln" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/DomainFixture.TestGenerator/DomainFixture.TestGenerator.csproj" beforeDir="false" afterPath="$PROJECT_DIR$/src/DomainFixture.TestGenerator/DomainFixture.TestGenerator.csproj" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/DomainFixture.TestGenerator/TestNameBuilder.cs" beforeDir="false" afterPath="$PROJECT_DIR$/src/DomainFixture.TestGenerator/TestNameBuilder.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/DomainFixture/FixtureConfigurations/FixturePropertyBuilder.cs" beforeDir="false" afterPath="$PROJECT_DIR$/src/DomainFixture/FixtureConfigurations/FixturePropertyBuilder.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/DomainFixture/FixtureConfigurations/IFixturePropertyBuilder.cs" beforeDir="false" afterPath="$PROJECT_DIR$/src/DomainFixture/FixtureConfigurations/IFixturePropertyBuilder.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/tests/DomainFixture.Tests/Fixtures/FixturePropertyBuilderTests.cs" beforeDir="false" afterPath="$PROJECT_DIR$/tests/DomainFixture.Tests/Fixtures/FixturePropertyBuilderTests.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/tests/DomainFixture.Tests/Fixtures/UserConfigurationTests.cs" beforeDir="false" afterPath="$PROJECT_DIR$/tests/DomainFixture.Tests/Fixtures/UserConfigurationTests.cs" afterDir="false" />
-    </list>
+    <list default="true" id="4b85ba2c-5b77-4697-ac23-b790ca681b81" name="Changes" comment="feat: initial work on TestGenerator" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -81,7 +55,7 @@
     <property name="node.js.detected.package.tslint" value="true" />
     <property name="node.js.selected.package.eslint" value="(autodetect)" />
     <property name="node.js.selected.package.tslint" value="(autodetect)" />
-    <property name="settings.editor.selected.configurable" value="AndroidSettingsPageId" />
+    <property name="settings.editor.selected.configurable" value="preferences.sourceCode.C#" />
     <property name="vue.rearranger.settings.migration" value="true" />
   </component>
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
@@ -95,7 +69,7 @@
       <workItem from="1641359283230" duration="1665000" />
       <workItem from="1641622080064" duration="33000" />
       <workItem from="1641622170113" duration="16157000" />
-      <workItem from="1641648180999" duration="20973000" />
+      <workItem from="1641648180999" duration="21431000" />
     </task>
     <task id="LOCAL-00001" summary="Initial commit">
       <created>1641359379241</created>
@@ -160,7 +134,14 @@
       <option name="project" value="LOCAL" />
       <updated>1641665600902</updated>
     </task>
-    <option name="localTasksCounter" value="10" />
+    <task id="LOCAL-00010" summary="feat: initial work on TestGenerator">
+      <created>1641730610135</created>
+      <option name="number" value="00010" />
+      <option name="presentableId" value="LOCAL-00010" />
+      <option name="project" value="LOCAL" />
+      <updated>1641730610135</updated>
+    </task>
+    <option name="localTasksCounter" value="11" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -193,7 +174,8 @@
     <MESSAGE value="refactor: make FixtureConfigurationBuilder`1.PropertyBuilder readonly" />
     <MESSAGE value="refactor: better naming" />
     <MESSAGE value="refactor: use .NET Standard 2.0" />
-    <option name="LAST_COMMIT_MESSAGE" value="refactor: use .NET Standard 2.0" />
+    <MESSAGE value="feat: initial work on TestGenerator" />
+    <option name="LAST_COMMIT_MESSAGE" value="feat: initial work on TestGenerator" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -234,5 +216,9 @@
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>
+  </component>
+  <component name="XSLT-Support.FileAssociations.UIState">
+    <expand />
+    <select />
   </component>
 </project>
