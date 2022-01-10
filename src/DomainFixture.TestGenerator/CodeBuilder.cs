@@ -24,14 +24,14 @@ public abstract class CodeBuilder
 
     public CodeBuilder Append(string content)
     {
-        _stringBuilder.Append(content);
+        _stringBuilder.Append(WithIndent(content));
 
         return this;
     }
 
-    public CodeBuilder AppendLine(string content)
+    public CodeBuilder AppendLine(string content = "")
     {
-        _stringBuilder.AppendLine(content);
+        _stringBuilder.AppendLine(WithIndent(content));
 
         return this;
     }
@@ -52,4 +52,6 @@ public abstract class CodeBuilder
     protected virtual void AfterWrite()
     {
     }
+
+    private string WithIndent(string content) => new string(' ', _indentationLevel * 4) + content;
 }
