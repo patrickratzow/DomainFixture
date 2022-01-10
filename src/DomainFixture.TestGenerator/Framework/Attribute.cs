@@ -13,11 +13,16 @@ public record Attribute(string Name, string Namespace, List<string>? Parameters 
         builder.Append(Name);
         if (Parameters is { Count: > 0 })
         {
-            foreach (var parameter in Parameters)
+            builder.Append('(');
+            for (var i = 0; i < Parameters.Count; i++)
             {
-                builder.Append(' ');
+                if (i != 0) 
+                    builder.Append(' ');
+                
+                var parameter = Parameters[i];
                 builder.Append(parameter);
             }
+            builder.Append(')');
         }
         
         builder.Append(']');
