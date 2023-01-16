@@ -6,6 +6,10 @@ namespace DomainFixture.TestGenerator.Framework;
 
 public record FrameworkAttributes(IReadOnlyCollection<Attribute> TestAttributes, Attribute? ClassAttribute = null)
 {
+    /// <summary>
+    /// All namespaces used by the attributes
+    /// </summary>½
+    /// <return>A distinct list of full path namespaces</return>
     private IReadOnlyCollection<string> Namespaces
     {
         get

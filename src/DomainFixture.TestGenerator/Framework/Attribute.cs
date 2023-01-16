@@ -9,13 +9,15 @@ public record Attribute(string Name, string Namespace, List<string>? Parameters 
     {
         var builder = new StringBuilder();
         builder.Append('[');
-        
         builder.Append(Name);
+        
+        // If we have parameters, write them out
         if (Parameters is { Count: > 0 })
         {
             builder.Append('(');
             for (var i = 0; i < Parameters.Count; i++)
             {
+                // Don't add a space for the first iteration
                 if (i != 0) 
                     builder.Append(' ');
                 

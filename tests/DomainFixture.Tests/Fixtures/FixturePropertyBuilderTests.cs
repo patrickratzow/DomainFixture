@@ -1,10 +1,12 @@
-﻿using DomainFixture.FixtureConfigurations;
+﻿using System.Diagnostics.CodeAnalysis;
+using DomainFixture.FixtureConfigurations;
 using FluentAssertions;
 using NUnit.Framework;
 
 namespace DomainFixture.Tests.Fixtures;
 
 [TestFixture]
+[SuppressMessage("ReSharper", "JoinDeclarationAndInitializer")]
 public class FixturePropertyBuilderTests
 {
     private record Fixture(string Name);

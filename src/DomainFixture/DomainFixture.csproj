@@ -17,10 +17,6 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\DomainFixture.Contracts\DomainFixture.Contracts.csproj" />
-    </ItemGroup>
-
-    <ItemGroup>
       <PackageReference Include="System.Memory" Version="4.5.4" />
     </ItemGroup>
 

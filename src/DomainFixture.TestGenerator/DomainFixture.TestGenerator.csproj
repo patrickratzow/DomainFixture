@@ -7,7 +7,6 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\DomainFixture.Contracts\DomainFixture.Contracts.csproj" />
       <ProjectReference Include="..\DomainFixture\DomainFixture.csproj" />
     </ItemGroup>
 
