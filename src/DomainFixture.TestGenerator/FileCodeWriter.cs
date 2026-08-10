@@ -26,13 +26,18 @@ public class FileCodeWriter<TClass> : CodeBuilder
     
     protected override void BeforeWrite()
     {
-        var namespaces = _testWriters.Select(x => x.Namespaces).Distinct();
+        AppendLine("using System.CodeDom.Compiler;");
+        AppendLine("using DomainFixture;");
+
+        var namespaces = _frameworkAttributes.Namespaces
+            .Concat(_testWriters.SelectMany(x => x.Namespaces))
+            .Where(x => x is not "System.CodeDom.Compiler" and not "DomainFixture")
+            .Distinct()
+            .OrderBy(x => x);
         foreach (var @namespace in namespaces)
         {
             AppendLine($"using {@namespace};");
         }
-        AppendLine("using System.CodeDom.Compiler;");
-        AppendLine("using DomainFixture;");
         AppendLine();
     }
 

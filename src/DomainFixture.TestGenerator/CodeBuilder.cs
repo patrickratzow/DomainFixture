@@ -31,13 +31,16 @@ public abstract class CodeBuilder
 
     public CodeBuilder AppendLine(string content = "")
     {
-        _stringBuilder.AppendLine(WithIndent(content));
+        _stringBuilder.Append(WithIndent(content));
+        _stringBuilder.Append('\n');
 
         return this;
     }
 
     public override string ToString()
     {
+        _stringBuilder.Clear();
+        _indentationLevel = 0;
         BeforeWrite();
         Write();
         AfterWrite();

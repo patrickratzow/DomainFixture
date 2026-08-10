@@ -17,9 +17,8 @@ public record Attribute(string Name, string Namespace, List<string>? Parameters 
             builder.Append('(');
             for (var i = 0; i < Parameters.Count; i++)
             {
-                // Don't add a space for the first iteration
-                if (i != 0) 
-                    builder.Append(' ');
+                if (i != 0)
+                    builder.Append(", ");
                 
                 var parameter = Parameters[i];
                 builder.Append(parameter);

@@ -51,4 +51,17 @@ public class AttributeCodeWriterTests
         // Assert
         result.Should().Be($"[Test]{Environment.NewLine}[Category(\"User\")]");
     }
+
+    [Test]
+    public void ToString_ShouldSeparateMultipleParametersWithCommas()
+    {
+        _writer.AddAttributes(new[]
+        {
+            new Attribute("Category", "TestNamespace", new() { "\"User\"", "\"Boundary\"" })
+        });
+
+        var result = _writer.ToString();
+
+        result.Should().Be("[Category(\"User\", \"Boundary\")]");
+    }
 }

@@ -8,9 +8,9 @@ public record FrameworkAttributes(IReadOnlyCollection<Attribute> TestAttributes,
 {
     /// <summary>
     /// All namespaces used by the attributes
-    /// </summary>½
+    /// </summary>
     /// <return>A distinct list of full path namespaces</return>
-    private IReadOnlyCollection<string> Namespaces
+    public IReadOnlyCollection<string> Namespaces
     {
         get
         {

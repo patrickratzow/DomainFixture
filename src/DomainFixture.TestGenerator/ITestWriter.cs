@@ -10,7 +10,6 @@ public interface ITestWriter
 
 public class TestWriter<TClass, TProperty> : ITestWriter
 {
-
-    public List<string> Namespaces { get; }
-    public List<string> Tests { get; }
+    public List<string> Namespaces { get; } = new();
+    public List<string> Tests { get; } = new();
 }
