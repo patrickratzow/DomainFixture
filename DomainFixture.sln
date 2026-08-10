@@ -16,6 +16,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DomainFixture.TestGenerator
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DomainFixture.TestGenerator.Tests", "tests\DomainFixture.TestGenerator.Tests\DomainFixture.TestGenerator.Tests.csproj", "{9A965770-32BC-4D8F-B142-176EDF949487}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DomainFixture.SourceGenerator.Tests", "tests\DomainFixture.SourceGenerator.Tests\DomainFixture.SourceGenerator.Tests.csproj", "{7CE8503C-C8A1-42C9-91E8-CB5D1347FA25}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -46,6 +48,10 @@ Global
 		{9A965770-32BC-4D8F-B142-176EDF949487}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9A965770-32BC-4D8F-B142-176EDF949487}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9A965770-32BC-4D8F-B142-176EDF949487}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7CE8503C-C8A1-42C9-91E8-CB5D1347FA25}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7CE8503C-C8A1-42C9-91E8-CB5D1347FA25}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7CE8503C-C8A1-42C9-91E8-CB5D1347FA25}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7CE8503C-C8A1-42C9-91E8-CB5D1347FA25}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{1443714B-CF39-4213-8113-B50787FE58A6} = {33C9782A-06C3-45F1-99F8-67A2B2EF8696}
@@ -54,5 +60,6 @@ Global
 		{1EBC6459-3989-42B9-87BD-035466D8FD14} = {2BF82380-38D7-45EC-809C-CE0654AD6798}
 		{80A33627-FE5C-42A1-B3A1-3A92675853E8} = {33C9782A-06C3-45F1-99F8-67A2B2EF8696}
 		{9A965770-32BC-4D8F-B142-176EDF949487} = {2BF82380-38D7-45EC-809C-CE0654AD6798}
+		{7CE8503C-C8A1-42C9-91E8-CB5D1347FA25} = {2BF82380-38D7-45EC-809C-CE0654AD6798}
 	EndGlobalSection
 EndGlobal
