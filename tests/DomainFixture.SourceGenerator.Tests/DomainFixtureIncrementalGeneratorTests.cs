@@ -36,8 +36,8 @@ public class DomainFixtureIncrementalGeneratorTests
     public void Generator_ShouldReportDiagnostic_WhenFluentChainIsIncomplete()
     {
         var source = ValidSource.Replace(
-            ".RulesFrom<RegistrationRules>();",
-            ";");
+            ".Baseline(Baseline)\n                .ValidateWith(Validator)",
+            ".ValidateWith(Validator)");
 
         var result = RunGenerator(source, out _);
 
@@ -319,6 +319,7 @@ using DomainFixture.Generation.Metadata;
 
 [assembly: ValidationRuleManifest(
     typeof(External.RegistrationRules),
+    typeof(External.User),
     ""Description"",
     ValidationRuleManifestKind.StringLength,
     4,

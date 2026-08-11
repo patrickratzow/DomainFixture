@@ -93,9 +93,13 @@ internal static class FluentValidationRuleProvider
             cancellationToken)?.ContainingType;
         if (validationRulesType is null)
             return null;
+        var subjectType = FindValidatedType(validationRulesType);
+        if (subjectType is null)
+            return null;
 
         return RuleExtractionResult.Success(new ValidationRuleSpec(
             validationRulesType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat),
+            subjectType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat),
             property.Name,
             kind.Value,
             minimum,
@@ -103,6 +107,27 @@ internal static class FluentValidationRuleProvider
             FindErrorCode(semanticModel, invocation),
             HasAccessibleSetter(property),
             invocation.GetLocation()));
+    }
+
+    private static ITypeSymbol? FindValidatedType(INamedTypeSymbol validationRulesType)
+    {
+        var validatorInterface = validationRulesType.AllInterfaces.FirstOrDefault(candidate =>
+            candidate.OriginalDefinition.MetadataName == "IValidator`1" &&
+            candidate.ContainingNamespace.ToDisplayString() == "FluentValidation");
+        if (validatorInterface?.TypeArguments.Length == 1)
+            return validatorInterface.TypeArguments[0];
+
+        for (var current = validationRulesType.BaseType; current is not null; current = current.BaseType)
+        {
+            if (current.OriginalDefinition.MetadataName == "AbstractValidator`1" &&
+                current.ContainingNamespace.ToDisplayString() == "FluentValidation" &&
+                current.TypeArguments.Length == 1)
+            {
+                return current.TypeArguments[0];
+            }
+        }
+
+        return null;
     }
 
     private static bool TryReadSingleIntArgument(

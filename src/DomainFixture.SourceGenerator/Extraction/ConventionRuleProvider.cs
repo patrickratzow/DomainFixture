@@ -18,7 +18,8 @@ internal static class ConventionRuleProvider
 
     public static IEnumerable<ValidationRuleSpec> Create(
         FixtureGenerationSpec configuration,
-        GenerationProfileSpec profile)
+        GenerationProfileSpec profile,
+        string validationRulesTypeKey)
     {
         foreach (var property in configuration.SubjectProperties.Where(property => property.IsString))
         {
@@ -27,6 +28,7 @@ internal static class ConventionRuleProvider
                 yield return CreateRule(
                     configuration,
                     property,
+                    validationRulesTypeKey,
                     ValidationRuleKind.NotNull);
             }
 
@@ -35,6 +37,7 @@ internal static class ConventionRuleProvider
                 yield return CreateRule(
                     configuration,
                     property,
+                    validationRulesTypeKey,
                     ValidationRuleKind.NotEmpty);
             }
         }
@@ -47,9 +50,11 @@ internal static class ConventionRuleProvider
     private static ValidationRuleSpec CreateRule(
         FixtureGenerationSpec configuration,
         SubjectPropertySpec property,
+        string validationRulesTypeKey,
         ValidationRuleKind kind) =>
         new(
-            configuration.ValidationRulesTypeKey,
+            validationRulesTypeKey,
+            configuration.SubjectTypeName,
             property.Name,
             kind,
             minimum: null,

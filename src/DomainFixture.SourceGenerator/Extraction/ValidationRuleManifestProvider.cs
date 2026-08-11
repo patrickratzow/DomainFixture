@@ -28,13 +28,14 @@ internal static class ValidationRuleManifestProvider
             foreach (var attribute in assembly.GetAttributes())
             {
                 if (attribute.AttributeClass?.ToDisplayString() != AttributeMetadataName ||
-                    attribute.ConstructorArguments.Length != 7 ||
+                    attribute.ConstructorArguments.Length != 8 ||
                     attribute.ConstructorArguments[0].Value is not INamedTypeSymbol rulesType ||
-                    attribute.ConstructorArguments[1].Value is not string propertyName ||
-                    attribute.ConstructorArguments[2].Value is not int rawKind ||
-                    attribute.ConstructorArguments[3].Value is not int minimum ||
-                    attribute.ConstructorArguments[4].Value is not int maximum ||
-                    attribute.ConstructorArguments[6].Value is not bool propertyCanBeAssigned)
+                    attribute.ConstructorArguments[1].Value is not INamedTypeSymbol subjectType ||
+                    attribute.ConstructorArguments[2].Value is not string propertyName ||
+                    attribute.ConstructorArguments[3].Value is not int rawKind ||
+                    attribute.ConstructorArguments[4].Value is not int minimum ||
+                    attribute.ConstructorArguments[5].Value is not int maximum ||
+                    attribute.ConstructorArguments[7].Value is not bool propertyCanBeAssigned)
                 {
                     continue;
                 }
@@ -44,11 +45,12 @@ internal static class ValidationRuleManifestProvider
 
                 results.Add(RuleExtractionResult.Success(new ValidationRuleSpec(
                     rulesType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat),
+                    subjectType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat),
                     propertyName,
                     kind,
                     minimum < 0 ? null : minimum,
                     maximum < 0 ? null : maximum,
-                    attribute.ConstructorArguments[5].Value as string,
+                    attribute.ConstructorArguments[6].Value as string,
                     propertyCanBeAssigned,
                     null)));
             }

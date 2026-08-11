@@ -19,6 +19,13 @@ public interface IFixtureGenerationOptions
     IFixtureActivationOptions Activation();
 
     IFixtureMutationOptions Mutations();
+
+    IFixtureValidationOptions Validation();
+}
+
+public interface IFixtureValidationOptions
+{
+    IFixtureValidationOptions UseFluentValidation();
 }
 
 public interface IFixtureMutationOptions

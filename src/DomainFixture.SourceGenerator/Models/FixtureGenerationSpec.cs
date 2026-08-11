@@ -11,8 +11,8 @@ internal sealed class FixtureGenerationSpec
     public string SubjectTypeName { get; }
     public string SubjectTypeShortName { get; }
     public string BaselineFactoryExpression { get; }
-    public string ValidatorFactoryExpression { get; }
-    public string ValidationRulesTypeKey { get; }
+    public string? ValidatorFactoryExpression { get; }
+    public string? ValidationRulesTypeKey { get; }
     public ImmutableArray<SubjectPropertySpec> SubjectProperties { get; }
     public Location? Location { get; }
 
@@ -23,8 +23,8 @@ internal sealed class FixtureGenerationSpec
         string subjectTypeName,
         string subjectTypeShortName,
         string baselineFactoryExpression,
-        string validatorFactoryExpression,
-        string validationRulesTypeKey,
+        string? validatorFactoryExpression,
+        string? validationRulesTypeKey,
         ImmutableArray<SubjectPropertySpec> subjectProperties,
         Location? location)
     {

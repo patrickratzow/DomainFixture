@@ -8,6 +8,10 @@ The `.verified.cs` files are the exact NUnit sources generated from:
 - `DomainFixture.Tests.Domain.ValueObjects.UsernameValidator` in the real `.Domain` assembly;
 - `UsernameFixture.cs` and its centrally configured reconstruction strategy.
 
+The test-project generation profile enables FluentValidation once for the assembly. Fixtures only
+provide their baseline; the generator matches the validator by subject type and emits the adapter
+shown in each snapshot. `ValidateWith(...)` and `RulesFrom<TValidator>()` remain optional overrides.
+
 Run the snapshot check with:
 
 ```powershell

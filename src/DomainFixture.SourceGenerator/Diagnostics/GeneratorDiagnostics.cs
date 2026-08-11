@@ -7,7 +7,7 @@ internal static class GeneratorDiagnostics
     private static readonly DiagnosticDescriptor InvalidConfiguration = new(
         "DFG001",
         "Fixture-test configuration is incomplete",
-        "Fixture-test configuration '{0}' must declare a fluent chain containing Recipe, Baseline, ValidateWith, and RulesFrom",
+        "Fixture-test configuration '{0}' must declare a fluent chain containing Recipe and Baseline",
         "DomainFixture.Generation",
         DiagnosticSeverity.Error,
         isEnabledByDefault: true);
@@ -92,6 +92,30 @@ internal static class GeneratorDiagnostics
         DiagnosticSeverity.Error,
         isEnabledByDefault: true);
 
+    private static readonly DiagnosticDescriptor MissingSubjectValidator = new(
+        "DFG012",
+        "No validation rules were found for subject",
+        "No FluentValidation validator with supported rules was found for subject '{0}'",
+        "DomainFixture.Generation",
+        DiagnosticSeverity.Error,
+        isEnabledByDefault: true);
+
+    private static readonly DiagnosticDescriptor AmbiguousSubjectValidator = new(
+        "DFG013",
+        "Validation rules are ambiguous",
+        "More than one FluentValidation validator was found for subject '{0}'; select one with RulesFrom<TValidator>()",
+        "DomainFixture.Generation",
+        DiagnosticSeverity.Error,
+        isEnabledByDefault: true);
+
+    private static readonly DiagnosticDescriptor MissingValidationExecution = new(
+        "DFG014",
+        "Validation execution is not configured",
+        "Fixture '{0}' must use ValidateWith(...) or enable FluentValidation in the assembly generation profile",
+        "DomainFixture.Generation",
+        DiagnosticSeverity.Error,
+        isEnabledByDefault: true);
+
     public static Diagnostic IncompleteConfiguration(Location? location, string configurationName) =>
         Diagnostic.Create(InvalidConfiguration, location, configurationName);
 
@@ -139,4 +163,13 @@ internal static class GeneratorDiagnostics
             profileName,
             subjectType,
             propertyName);
+
+    public static Diagnostic SubjectValidatorMissing(Location? location, string subjectType) =>
+        Diagnostic.Create(MissingSubjectValidator, location, subjectType);
+
+    public static Diagnostic SubjectValidatorAmbiguous(Location? location, string subjectType) =>
+        Diagnostic.Create(AmbiguousSubjectValidator, location, subjectType);
+
+    public static Diagnostic ValidationExecutionMissing(Location? location, string fixtureName) =>
+        Diagnostic.Create(MissingValidationExecution, location, fixtureName);
 }

@@ -17,6 +17,7 @@ public enum ValidationRuleManifestKind
 public sealed class ValidationRuleManifestAttribute : Attribute
 {
     public Type ValidationRulesType { get; }
+    public Type SubjectType { get; }
     public string PropertyName { get; }
     public ValidationRuleManifestKind Kind { get; }
     public int Minimum { get; }
@@ -26,6 +27,7 @@ public sealed class ValidationRuleManifestAttribute : Attribute
 
     public ValidationRuleManifestAttribute(
         Type validationRulesType,
+        Type subjectType,
         string propertyName,
         ValidationRuleManifestKind kind,
         int minimum,
@@ -34,6 +36,7 @@ public sealed class ValidationRuleManifestAttribute : Attribute
         bool propertyCanBeAssigned)
     {
         ValidationRulesType = validationRulesType;
+        SubjectType = subjectType;
         PropertyName = propertyName;
         Kind = kind;
         Minimum = minimum;

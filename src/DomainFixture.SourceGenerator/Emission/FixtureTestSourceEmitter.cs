@@ -37,9 +37,47 @@ internal static class FixtureTestSourceEmitter
             var propertyMutations = profileResult.Profile.PropertyMutations
                 .Where(mutation => mutation.SubjectTypeKey == configuration.SubjectTypeName)
                 .ToDictionary(mutation => mutation.PropertyName);
+            var validationRulesTypeKey = configuration.ValidationRulesTypeKey;
+            if (validationRulesTypeKey is null)
+            {
+                if (!profileResult.Profile.UseFluentValidation)
+                {
+                    context.ReportDiagnostic(GeneratorDiagnostics.ValidationExecutionMissing(
+                        configuration.Location,
+                        configuration.ConfigurationName));
+                    continue;
+                }
+
+                var matchingValidators = rules
+                    .Where(rule => rule.SubjectTypeKey == configuration.SubjectTypeName)
+                    .Select(rule => rule.ValidationRulesTypeKey)
+                    .Distinct()
+                    .ToArray();
+                if (matchingValidators.Length == 0)
+                {
+                    context.ReportDiagnostic(GeneratorDiagnostics.SubjectValidatorMissing(
+                        configuration.Location,
+                        configuration.SubjectTypeName));
+                    continue;
+                }
+
+                if (matchingValidators.Length > 1)
+                {
+                    context.ReportDiagnostic(GeneratorDiagnostics.SubjectValidatorAmbiguous(
+                        configuration.Location,
+                        configuration.SubjectTypeName));
+                    continue;
+                }
+
+                validationRulesTypeKey = matchingValidators[0];
+            }
+
             var matchingRules = rules
-                .Where(rule => rule.ValidationRulesTypeKey == configuration.ValidationRulesTypeKey)
-                .Concat(ConventionRuleProvider.Create(configuration, profileResult.Profile))
+                .Where(rule => rule.ValidationRulesTypeKey == validationRulesTypeKey)
+                .Concat(ConventionRuleProvider.Create(
+                    configuration,
+                    profileResult.Profile,
+                    validationRulesTypeKey))
                 .GroupBy(rule => new { rule.PropertyName, rule.Kind })
                 .Select(group => group.First())
                 .ToArray();
@@ -47,7 +85,7 @@ internal static class FixtureTestSourceEmitter
             {
                 context.ReportDiagnostic(GeneratorDiagnostics.MissingSupportedRules(
                     configuration.Location,
-                    configuration.ValidationRulesTypeKey));
+                    validationRulesTypeKey));
                 continue;
             }
 
@@ -68,16 +106,39 @@ internal static class FixtureTestSourceEmitter
                     validationCase,
                     propertyMutations))
                 .ToArray();
+            var validatorFactoryExpression = configuration.ValidatorFactoryExpression;
+            string? generatedAdapter = null;
+            if (validatorFactoryExpression is null)
+            {
+                if (!profileResult.Profile.UseFluentValidation)
+                {
+                    context.ReportDiagnostic(GeneratorDiagnostics.ValidationExecutionMissing(
+                        configuration.Location,
+                        configuration.ConfigurationName));
+                    continue;
+                }
+
+                var adapterClassName =
+                    $"{configuration.SubjectTypeShortName}{configuration.RecipeName}FluentValidationAdapter";
+                validatorFactoryExpression =
+                    $"new global::{configuration.NamespaceName}.{adapterClassName}()";
+                generatedAdapter = FluentValidationAdapterEmitter.Emit(
+                    configuration.NamespaceName,
+                    adapterClassName,
+                    configuration.SubjectTypeName,
+                    validationRulesTypeKey);
+            }
+
             var descriptor = new ValidationTestSuiteDescriptor(
                 configuration.NamespaceName,
                 $"{configuration.SubjectTypeShortName}{configuration.RecipeName}GeneratedTests",
                 configuration.RecipeName,
                 SyntaxFactory.ParseTypeName(configuration.SubjectTypeName),
                 SyntaxFactory.ParseExpression(configuration.BaselineFactoryExpression),
-                SyntaxFactory.ParseExpression(configuration.ValidatorFactoryExpression),
+                SyntaxFactory.ParseExpression(validatorFactoryExpression),
                 cases);
             var suite = new ValidationTestSuiteBuilder().Build(descriptor);
-            var source = new NUnitTestEmitter().EmitSource(suite);
+            var source = new NUnitTestEmitter().EmitSource(suite) + generatedAdapter;
             var hintName = $"{configuration.ConfigurationName}.{configuration.RecipeName}.g.cs";
 
             context.AddSource(hintName, SourceText.From(source, Encoding.UTF8));

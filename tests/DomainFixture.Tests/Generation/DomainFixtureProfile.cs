@@ -7,6 +7,9 @@ public sealed class DomainFixtureProfile : IFixtureGenerationProfile
 {
     public void Configure(IFixtureGenerationOptions options)
     {
+        options.Validation()
+            .UseFluentValidation();
+
         options.Conventions()
             .UseNullability()
             .UsePropertyNames();

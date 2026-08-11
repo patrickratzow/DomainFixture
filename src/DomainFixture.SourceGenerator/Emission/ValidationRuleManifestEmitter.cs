@@ -26,6 +26,8 @@ internal static class ValidationRuleManifestEmitter
         {
             source.Append("[assembly: global::DomainFixture.Generation.Metadata.ValidationRuleManifestAttribute(typeof(")
                 .Append(rule.ValidationRulesTypeKey)
+                .Append("), typeof(")
+                .Append(rule.SubjectTypeKey)
                 .Append("), ")
                 .Append(Quote(rule.PropertyName))
                 .Append(", global::DomainFixture.Generation.Metadata.ValidationRuleManifestKind.")

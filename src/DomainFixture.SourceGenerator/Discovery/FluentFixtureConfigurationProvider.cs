@@ -60,8 +60,12 @@ internal static class FluentFixtureConfigurationProvider
         var diagnostics = ImmutableArray.CreateBuilder<Diagnostic>();
 
         var recipeChains = configureDeclaration.DescendantNodes()
-            .OfType<InvocationExpressionSyntax>()
-            .Where(invocation => IsGenerationMethod(semanticModel, invocation, "RulesFrom"))
+            .OfType<ExpressionStatementSyntax>()
+            .Select(statement => statement.Expression as InvocationExpressionSyntax)
+            .Where(invocation => invocation is not null &&
+                EnumerateChain(invocation).Any(candidate =>
+                    IsGenerationMethod(semanticModel, candidate, "Recipe")))
+            .Select(invocation => invocation!)
             .ToArray();
         if (recipeChains.Length == 0)
         {
@@ -142,9 +146,7 @@ internal static class FluentFixtureConfigurationProvider
         }
 
         if (string.IsNullOrWhiteSpace(recipeName) ||
-            baselineFactory is null ||
-            validatorFactory is null ||
-            validationRulesType is null)
+            baselineFactory is null)
         {
             diagnostics.Add(GeneratorDiagnostics.IncompleteConfiguration(
                 outerInvocation.GetLocation(),
@@ -160,7 +162,7 @@ internal static class FluentFixtureConfigurationProvider
             return null;
         }
 
-        if (!IsCallableFactory(validatorFactory))
+        if (validatorFactory is not null && !IsCallableFactory(validatorFactory))
         {
             diagnostics.Add(GeneratorDiagnostics.InaccessibleFactory(
                 validatorFactory.Locations.FirstOrDefault() ?? outerInvocation.GetLocation(),
@@ -176,7 +178,8 @@ internal static class FluentFixtureConfigurationProvider
             return null;
         }
 
-        if (!ImplementsFixtureValidator(validatorFactory.ReturnType, subjectType))
+        if (validatorFactory is not null &&
+            !ImplementsFixtureValidator(validatorFactory.ReturnType, subjectType))
         {
             diagnostics.Add(GeneratorDiagnostics.IncompatibleValidator(
                 validatorFactory.Locations.FirstOrDefault() ?? outerInvocation.GetLocation(),
@@ -196,8 +199,8 @@ internal static class FluentFixtureConfigurationProvider
             subjectType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat),
             subjectType.Name,
             CreateFactoryExpression(baselineFactory),
-            CreateFactoryExpression(validatorFactory),
-            validationRulesType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat),
+            validatorFactory is null ? null : CreateFactoryExpression(validatorFactory),
+            validationRulesType?.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat),
             DiscoverProperties(subjectType),
             outerInvocation.GetLocation());
     }
