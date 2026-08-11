@@ -81,7 +81,10 @@ MediatR reference or a hard-coded request convention.
 
 ## Validation module
 
-A FluentValidation-style module has two responsibilities:
+The concrete [`DomainFixture.Modules.FluentValidation`](fluentvalidation-module.md) analyzer uses
+this path today.
+
+The FluentValidation module has two responsibilities:
 
 1. Translate validator rules into `DomainContractManifestAttribute` constraints using the module
    source marker.

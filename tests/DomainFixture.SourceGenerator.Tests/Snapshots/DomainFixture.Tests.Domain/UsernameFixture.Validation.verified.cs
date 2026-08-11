@@ -1,13 +1,8 @@
 using System.CodeDom.Compiler;
 using NUnit.Framework;
-using System.Collections.Generic;
-using IFixtureValidator = global::DomainFixture.Validation.IFixtureValidator<global::DomainFixture.Tests.Domain.ValueObjects.Username>;
 using Username = global::DomainFixture.Tests.Domain.ValueObjects.Username;
-using UsernameValidator = global::DomainFixture.Tests.Domain.ValueObjects.UsernameValidator;
-using ValidationContext = global::FluentValidation.ValidationContext<global::DomainFixture.Tests.Domain.ValueObjects.Username>;
+using UsernameUsernameValidatorAdapter_54a861c7c0906207 = global::DomainFixture.Modules.FluentValidation.Generated.UsernameUsernameValidatorAdapter_54a861c7c0906207;
 using ValidationException = global::FluentValidation.ValidationException;
-using ValidationFailure = global::DomainFixture.Validation.ValidationFailure;
-using ValidationReport = global::DomainFixture.Validation.ValidationReport;
 using ValueOf = global::DomainFixture.Tests.Domain.ValueObjects.ValueOf<string, global::DomainFixture.Tests.Domain.ValueObjects.Username>;
 
 namespace DomainFixture.Tests.Generation
@@ -20,7 +15,7 @@ namespace DomainFixture.Tests.Generation
         public void Validation_Baseline_IsValid()
         {
             Username subject = UsernameFixture.Baseline();
-            var validator = new UsernameValidationFluentValidationAdapter();
+            var validator = new UsernameUsernameValidatorAdapter_54a861c7c0906207();
             var report = validator.Validate(subject);
             Assert.That(report.IsValid, Is.True);
         }
@@ -30,7 +25,7 @@ namespace DomainFixture.Tests.Generation
         {
             Username subject = UsernameFixture.Baseline();
             subject = UsernameValidationImmutableReconstruction.WithValue(subject, new string ('a', 128));
-            var validator = new UsernameValidationFluentValidationAdapter();
+            var validator = new UsernameUsernameValidatorAdapter_54a861c7c0906207();
             var report = validator.Validate(subject);
             Assert.That(report.IsValid, Is.True);
         }
@@ -40,7 +35,7 @@ namespace DomainFixture.Tests.Generation
         {
             Username subject = UsernameFixture.Baseline();
             subject = UsernameValidationImmutableReconstruction.WithValue(subject, new string ('a', 129));
-            var validator = new UsernameValidationFluentValidationAdapter();
+            var validator = new UsernameUsernameValidatorAdapter_54a861c7c0906207();
             var report = validator.Validate(subject);
             Assert.That(report.ContainsFailure("Value"), Is.True);
         }
@@ -50,7 +45,7 @@ namespace DomainFixture.Tests.Generation
         {
             Username subject = UsernameFixture.Baseline();
             subject = UsernameValidationImmutableReconstruction.WithValue(subject, "");
-            var validator = new UsernameValidationFluentValidationAdapter();
+            var validator = new UsernameUsernameValidatorAdapter_54a861c7c0906207();
             var report = validator.Validate(subject);
             Assert.That(report.ContainsFailure("Value"), Is.True);
         }
@@ -60,7 +55,7 @@ namespace DomainFixture.Tests.Generation
         {
             Username subject = UsernameFixture.Baseline();
             subject = UsernameValidationImmutableReconstruction.WithValue(subject, null);
-            var validator = new UsernameValidationFluentValidationAdapter();
+            var validator = new UsernameUsernameValidatorAdapter_54a861c7c0906207();
             var report = validator.Validate(subject);
             Assert.That(report.ContainsFailure("Value"), Is.True);
         }
@@ -124,26 +119,6 @@ namespace DomainFixture.Tests.Generation
             Username baseline = UsernameFixture.Baseline();
             Username constructed = ValueOf.From(baseline.Value);
             Assert.That(constructed.Value, Is.EqualTo(baseline.Value));
-        }
-    }
-}
-
-namespace DomainFixture.Tests.Generation
-{
-    internal sealed class UsernameValidationFluentValidationAdapter : IFixtureValidator
-    {
-        private readonly UsernameValidator _validator = new UsernameValidator();
-        public ValidationReport Validate(Username subject)
-        {
-            var context = new ValidationContext(subject);
-            var result = _validator.Validate(context);
-            var failures = new List<ValidationFailure>();
-            foreach (var error in result.Errors)
-            {
-                failures.Add(new ValidationFailure(error.PropertyName, error.ErrorCode, error.ErrorMessage));
-            }
-
-            return new ValidationReport(failures);
         }
     }
 }

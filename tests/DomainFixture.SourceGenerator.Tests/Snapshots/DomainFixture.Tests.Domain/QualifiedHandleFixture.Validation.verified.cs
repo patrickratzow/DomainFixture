@@ -1,12 +1,7 @@
 using System.CodeDom.Compiler;
 using NUnit.Framework;
-using System.Collections.Generic;
-using IFixtureValidator = global::DomainFixture.Validation.IFixtureValidator<global::DomainFixture.Tests.Domain.ValueObjects.QualifiedHandle>;
 using QualifiedHandle = global::DomainFixture.Tests.Domain.ValueObjects.QualifiedHandle;
-using QualifiedHandleValidator = global::DomainFixture.Tests.Domain.ValueObjects.QualifiedHandleValidator;
-using ValidationContext = global::FluentValidation.ValidationContext<global::DomainFixture.Tests.Domain.ValueObjects.QualifiedHandle>;
-using ValidationFailure = global::DomainFixture.Validation.ValidationFailure;
-using ValidationReport = global::DomainFixture.Validation.ValidationReport;
+using QualifiedHandleQualifiedHandleValidatorAdapter_5fca801652e9fab5 = global::DomainFixture.Modules.FluentValidation.Generated.QualifiedHandleQualifiedHandleValidatorAdapter_5fca801652e9fab5;
 
 namespace DomainFixture.Tests.Generation
 {
@@ -18,7 +13,7 @@ namespace DomainFixture.Tests.Generation
         public void Validation_Baseline_IsValid()
         {
             QualifiedHandle subject = QualifiedHandleFixture.Baseline();
-            var validator = new QualifiedHandleValidationFluentValidationAdapter();
+            var validator = new QualifiedHandleQualifiedHandleValidatorAdapter_5fca801652e9fab5();
             var report = validator.Validate(subject);
             Assert.That(report.IsValid, Is.True);
         }
@@ -28,7 +23,7 @@ namespace DomainFixture.Tests.Generation
         {
             QualifiedHandle subject = QualifiedHandleFixture.Baseline();
             subject = QualifiedHandleValidationImmutableReconstruction.WithName(subject, new string ('a', 32));
-            var validator = new QualifiedHandleValidationFluentValidationAdapter();
+            var validator = new QualifiedHandleQualifiedHandleValidatorAdapter_5fca801652e9fab5();
             var report = validator.Validate(subject);
             Assert.That(report.IsValid, Is.True);
         }
@@ -38,7 +33,7 @@ namespace DomainFixture.Tests.Generation
         {
             QualifiedHandle subject = QualifiedHandleFixture.Baseline();
             subject = QualifiedHandleValidationImmutableReconstruction.WithName(subject, new string ('a', 33));
-            var validator = new QualifiedHandleValidationFluentValidationAdapter();
+            var validator = new QualifiedHandleQualifiedHandleValidatorAdapter_5fca801652e9fab5();
             var report = validator.Validate(subject);
             Assert.That(report.ContainsFailure("Name"), Is.True);
         }
@@ -48,7 +43,7 @@ namespace DomainFixture.Tests.Generation
         {
             QualifiedHandle subject = QualifiedHandleFixture.Baseline();
             subject = QualifiedHandleValidationImmutableReconstruction.WithName(subject, new string ('a', 2));
-            var validator = new QualifiedHandleValidationFluentValidationAdapter();
+            var validator = new QualifiedHandleQualifiedHandleValidatorAdapter_5fca801652e9fab5();
             var report = validator.Validate(subject);
             Assert.That(report.ContainsFailure("Name"), Is.True);
         }
@@ -58,7 +53,7 @@ namespace DomainFixture.Tests.Generation
         {
             QualifiedHandle subject = QualifiedHandleFixture.Baseline();
             subject = QualifiedHandleValidationImmutableReconstruction.WithName(subject, new string ('a', 3));
-            var validator = new QualifiedHandleValidationFluentValidationAdapter();
+            var validator = new QualifiedHandleQualifiedHandleValidatorAdapter_5fca801652e9fab5();
             var report = validator.Validate(subject);
             Assert.That(report.IsValid, Is.True);
         }
@@ -68,7 +63,7 @@ namespace DomainFixture.Tests.Generation
         {
             QualifiedHandle subject = QualifiedHandleFixture.Baseline();
             subject = QualifiedHandleValidationImmutableReconstruction.WithName(subject, "");
-            var validator = new QualifiedHandleValidationFluentValidationAdapter();
+            var validator = new QualifiedHandleQualifiedHandleValidatorAdapter_5fca801652e9fab5();
             var report = validator.Validate(subject);
             Assert.That(report.ContainsFailure("Name"), Is.True);
         }
@@ -78,7 +73,7 @@ namespace DomainFixture.Tests.Generation
         {
             QualifiedHandle subject = QualifiedHandleFixture.Baseline();
             subject = QualifiedHandleValidationImmutableReconstruction.WithRealm(subject, new string ('a', 16));
-            var validator = new QualifiedHandleValidationFluentValidationAdapter();
+            var validator = new QualifiedHandleQualifiedHandleValidatorAdapter_5fca801652e9fab5();
             var report = validator.Validate(subject);
             Assert.That(report.IsValid, Is.True);
         }
@@ -88,7 +83,7 @@ namespace DomainFixture.Tests.Generation
         {
             QualifiedHandle subject = QualifiedHandleFixture.Baseline();
             subject = QualifiedHandleValidationImmutableReconstruction.WithRealm(subject, new string ('a', 17));
-            var validator = new QualifiedHandleValidationFluentValidationAdapter();
+            var validator = new QualifiedHandleQualifiedHandleValidatorAdapter_5fca801652e9fab5();
             var report = validator.Validate(subject);
             Assert.That(report.ContainsFailure("Realm"), Is.True);
         }
@@ -98,7 +93,7 @@ namespace DomainFixture.Tests.Generation
         {
             QualifiedHandle subject = QualifiedHandleFixture.Baseline();
             subject = QualifiedHandleValidationImmutableReconstruction.WithRealm(subject, "");
-            var validator = new QualifiedHandleValidationFluentValidationAdapter();
+            var validator = new QualifiedHandleQualifiedHandleValidatorAdapter_5fca801652e9fab5();
             var report = validator.Validate(subject);
             Assert.That(report.ContainsFailure("Realm"), Is.True);
         }
@@ -108,7 +103,7 @@ namespace DomainFixture.Tests.Generation
         {
             QualifiedHandle subject = QualifiedHandleFixture.Baseline();
             subject = QualifiedHandleValidationImmutableReconstruction.WithLevel(subject, 0);
-            var validator = new QualifiedHandleValidationFluentValidationAdapter();
+            var validator = new QualifiedHandleQualifiedHandleValidatorAdapter_5fca801652e9fab5();
             var report = validator.Validate(subject);
             Assert.That(report.ContainsFailure("Level"), Is.True);
         }
@@ -118,7 +113,7 @@ namespace DomainFixture.Tests.Generation
         {
             QualifiedHandle subject = QualifiedHandleFixture.Baseline();
             subject = QualifiedHandleValidationImmutableReconstruction.WithLevel(subject, 1);
-            var validator = new QualifiedHandleValidationFluentValidationAdapter();
+            var validator = new QualifiedHandleQualifiedHandleValidatorAdapter_5fca801652e9fab5();
             var report = validator.Validate(subject);
             Assert.That(report.IsValid, Is.True);
         }
@@ -128,7 +123,7 @@ namespace DomainFixture.Tests.Generation
         {
             QualifiedHandle subject = QualifiedHandleFixture.Baseline();
             subject = QualifiedHandleValidationImmutableReconstruction.WithLevel(subject, 10);
-            var validator = new QualifiedHandleValidationFluentValidationAdapter();
+            var validator = new QualifiedHandleQualifiedHandleValidatorAdapter_5fca801652e9fab5();
             var report = validator.Validate(subject);
             Assert.That(report.IsValid, Is.True);
         }
@@ -138,7 +133,7 @@ namespace DomainFixture.Tests.Generation
         {
             QualifiedHandle subject = QualifiedHandleFixture.Baseline();
             subject = QualifiedHandleValidationImmutableReconstruction.WithLevel(subject, 11);
-            var validator = new QualifiedHandleValidationFluentValidationAdapter();
+            var validator = new QualifiedHandleQualifiedHandleValidatorAdapter_5fca801652e9fab5();
             var report = validator.Validate(subject);
             Assert.That(report.ContainsFailure("Level"), Is.True);
         }
@@ -148,7 +143,7 @@ namespace DomainFixture.Tests.Generation
         {
             QualifiedHandle subject = QualifiedHandleFixture.Baseline();
             subject = QualifiedHandleValidationImmutableReconstruction.WithName(subject, null);
-            var validator = new QualifiedHandleValidationFluentValidationAdapter();
+            var validator = new QualifiedHandleQualifiedHandleValidatorAdapter_5fca801652e9fab5();
             var report = validator.Validate(subject);
             Assert.That(report.ContainsFailure("Name"), Is.True);
         }
@@ -158,7 +153,7 @@ namespace DomainFixture.Tests.Generation
         {
             QualifiedHandle subject = QualifiedHandleFixture.Baseline();
             subject = QualifiedHandleValidationImmutableReconstruction.WithRealm(subject, null);
-            var validator = new QualifiedHandleValidationFluentValidationAdapter();
+            var validator = new QualifiedHandleQualifiedHandleValidatorAdapter_5fca801652e9fab5();
             var report = validator.Validate(subject);
             Assert.That(report.ContainsFailure("Realm"), Is.True);
         }
@@ -203,26 +198,6 @@ namespace DomainFixture.Tests.Generation
             Assert.That(constructed.Name, Is.EqualTo(baseline.Name));
             Assert.That(constructed.Realm, Is.EqualTo(baseline.Realm));
             Assert.That(constructed.Level, Is.EqualTo(baseline.Level));
-        }
-    }
-}
-
-namespace DomainFixture.Tests.Generation
-{
-    internal sealed class QualifiedHandleValidationFluentValidationAdapter : IFixtureValidator
-    {
-        private readonly QualifiedHandleValidator _validator = new QualifiedHandleValidator();
-        public ValidationReport Validate(QualifiedHandle subject)
-        {
-            var context = new ValidationContext(subject);
-            var result = _validator.Validate(context);
-            var failures = new List<ValidationFailure>();
-            foreach (var error in result.Errors)
-            {
-                failures.Add(new ValidationFailure(error.PropertyName, error.ErrorCode, error.ErrorMessage));
-            }
-
-            return new ValidationReport(failures);
         }
     }
 }

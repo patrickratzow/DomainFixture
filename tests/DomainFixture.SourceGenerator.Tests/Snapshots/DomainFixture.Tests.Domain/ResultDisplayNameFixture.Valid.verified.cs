@@ -1,12 +1,7 @@
 using System.CodeDom.Compiler;
 using NUnit.Framework;
-using System.Collections.Generic;
-using IFixtureValidator = global::DomainFixture.Validation.IFixtureValidator<global::DomainFixture.Tests.Domain.ValueObjects.ResultDisplayName>;
 using ResultDisplayName = global::DomainFixture.Tests.Domain.ValueObjects.ResultDisplayName;
-using ResultDisplayNameValidator = global::DomainFixture.Tests.Domain.ValueObjects.ResultDisplayNameValidator;
-using ValidationContext = global::FluentValidation.ValidationContext<global::DomainFixture.Tests.Domain.ValueObjects.ResultDisplayName>;
-using ValidationFailure = global::DomainFixture.Validation.ValidationFailure;
-using ValidationReport = global::DomainFixture.Validation.ValidationReport;
+using ResultDisplayNameResultDisplayNameValidatorAdapter_416197817e5abcf7 = global::DomainFixture.Modules.FluentValidation.Generated.ResultDisplayNameResultDisplayNameValidatorAdapter_416197817e5abcf7;
 
 namespace DomainFixture.Tests.Generation
 {
@@ -18,7 +13,7 @@ namespace DomainFixture.Tests.Generation
         public void Valid_Baseline_IsValid()
         {
             ResultDisplayName subject = ResultDisplayNameFixtureFactory.Valid.Create();
-            var validator = new ResultDisplayNameValidFluentValidationAdapter();
+            var validator = new ResultDisplayNameResultDisplayNameValidatorAdapter_416197817e5abcf7();
             var report = validator.Validate(subject);
             Assert.That(report.IsValid, Is.True);
         }
@@ -28,7 +23,7 @@ namespace DomainFixture.Tests.Generation
         {
             ResultDisplayName subject = ResultDisplayNameFixtureFactory.Valid.Create();
             subject.Value = new string ('a', 24);
-            var validator = new ResultDisplayNameValidFluentValidationAdapter();
+            var validator = new ResultDisplayNameResultDisplayNameValidatorAdapter_416197817e5abcf7();
             var report = validator.Validate(subject);
             Assert.That(report.IsValid, Is.True);
         }
@@ -38,7 +33,7 @@ namespace DomainFixture.Tests.Generation
         {
             ResultDisplayName subject = ResultDisplayNameFixtureFactory.Valid.Create();
             subject.Value = new string ('a', 25);
-            var validator = new ResultDisplayNameValidFluentValidationAdapter();
+            var validator = new ResultDisplayNameResultDisplayNameValidatorAdapter_416197817e5abcf7();
             var report = validator.Validate(subject);
             Assert.That(report.ContainsFailure("Value"), Is.True);
         }
@@ -48,7 +43,7 @@ namespace DomainFixture.Tests.Generation
         {
             ResultDisplayName subject = ResultDisplayNameFixtureFactory.Valid.Create();
             subject.Value = "";
-            var validator = new ResultDisplayNameValidFluentValidationAdapter();
+            var validator = new ResultDisplayNameResultDisplayNameValidatorAdapter_416197817e5abcf7();
             var report = validator.Validate(subject);
             Assert.That(report.ContainsFailure("Value"), Is.True);
         }
@@ -58,7 +53,7 @@ namespace DomainFixture.Tests.Generation
         {
             ResultDisplayName subject = ResultDisplayNameFixtureFactory.Valid.Create();
             subject.Value = null;
-            var validator = new ResultDisplayNameValidFluentValidationAdapter();
+            var validator = new ResultDisplayNameResultDisplayNameValidatorAdapter_416197817e5abcf7();
             var report = validator.Validate(subject);
             Assert.That(report.ContainsFailure("Value"), Is.True);
         }
@@ -105,26 +100,6 @@ namespace DomainFixture.Tests.Generation
             Assert.That(result.IsSuccess, Is.True);
             ResultDisplayName constructed = result.Value;
             Assert.That(constructed.Value, Is.EqualTo(baseline.Value));
-        }
-    }
-}
-
-namespace DomainFixture.Tests.Generation
-{
-    internal sealed class ResultDisplayNameValidFluentValidationAdapter : IFixtureValidator
-    {
-        private readonly ResultDisplayNameValidator _validator = new ResultDisplayNameValidator();
-        public ValidationReport Validate(ResultDisplayName subject)
-        {
-            var context = new ValidationContext(subject);
-            var result = _validator.Validate(context);
-            var failures = new List<ValidationFailure>();
-            foreach (var error in result.Errors)
-            {
-                failures.Add(new ValidationFailure(error.PropertyName, error.ErrorCode, error.ErrorMessage));
-            }
-
-            return new ValidationReport(failures);
         }
     }
 }

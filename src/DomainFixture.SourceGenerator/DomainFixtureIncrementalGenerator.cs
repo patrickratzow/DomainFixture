@@ -136,7 +136,6 @@ public sealed class DomainFixtureIncrementalGenerator : IIncrementalGenerator
             var compilation = input.Right;
             var domainInput = generationInput.Left;
             var moduleCatalog = generationInput.Right;
-            CompileTimeModuleCatalogEmitter.Emit(productionContext, moduleCatalog);
             var parsedConfigurations = domainInput.Left.Left.Left.Left;
             var profileResult = domainInput.Left.Left.Left.Right;
             var constraints = domainInput.Left.Left.Right;
@@ -192,9 +191,18 @@ public sealed class DomainFixtureIncrementalGenerator : IIncrementalGenerator
                 profileResult.Profile);
             foreach (var diagnostic in implicitConfigurations.Diagnostics)
                 productionContext.ReportDiagnostic(diagnostic);
+            var discoveredConfigurations = rootConfigurations.AddRange(
+                implicitConfigurations.Configurations);
+            var activeModuleCatalog = ScopeModuleCatalog(
+                moduleCatalog,
+                discoveredConfigurations,
+                constraints,
+                scenarios,
+                manifests);
+            CompileTimeModuleCatalogEmitter.Emit(productionContext, activeModuleCatalog);
             var configurations = ApplyModuleValidationAdapters(
-                rootConfigurations.AddRange(implicitConfigurations.Configurations),
-                moduleCatalog.Validations);
+                discoveredConfigurations,
+                activeModuleCatalog.Validations);
             var discovered = DomainSpecNormalizer.Normalize(
                 configurations,
                 profileResult.Profile,
@@ -323,6 +331,59 @@ public sealed class DomainFixtureIncrementalGenerator : IIncrementalGenerator
                     $"new {validation.AdapterTypeName}()",
                     validation.SourceTypeName);
         }).ToImmutableArray();
+    }
+
+    private static CompileTimeModuleCatalog ScopeModuleCatalog(
+        CompileTimeModuleCatalog catalog,
+        ImmutableArray<FixtureGenerationSpec> configurations,
+        ImmutableArray<DiscoveredDomainConstraint> constraints,
+        ImmutableArray<DiscoveredDomainScenario> scenarios,
+        DomainOperationManifestExtraction manifests)
+    {
+        if (catalog.Modules.IsEmpty)
+            return catalog;
+
+        var subjects = new HashSet<string>(
+            configurations.Select(configuration => configuration.SubjectTypeName),
+            System.StringComparer.Ordinal);
+        var validations = catalog.Validations
+            .Where(validation => subjects.Contains(validation.SubjectTypeName))
+            .ToImmutableArray();
+
+        var activeModuleIds = new HashSet<string>(
+            catalog.Recipes
+                .Select(recipe => recipe.ModuleId)
+                .Concat(validations.Select(validation => validation.ModuleId)),
+            System.StringComparer.Ordinal);
+        var activeSourceTypes = new HashSet<string>(
+            constraints
+                .Where(constraint => subjects.Contains(constraint.Contract.SubjectTypeName))
+                .Select(constraint => constraint.Contract.SourceTypeName)
+                .Concat(scenarios
+                    .Where(scenario => subjects.Contains(scenario.Contract.SubjectTypeName))
+                    .Select(scenario => scenario.Contract.SourceTypeName))
+                .Concat(manifests.Operations
+                    .Where(operation => subjects.Contains(operation.Contract.SubjectTypeName))
+                    .Select(operation => operation.SourceTypeName))
+                .Concat(manifests.Outcomes
+                    .Where(outcome => subjects.Contains(outcome.SubjectTypeName))
+                    .Select(outcome => outcome.SourceTypeName)),
+            System.StringComparer.Ordinal);
+
+        foreach (var module in catalog.Modules)
+        {
+            if (activeSourceTypes.Contains(module.SourceTypeName))
+                activeModuleIds.Add(module.ModuleId);
+        }
+
+        var modules = catalog.Modules
+            .Where(module => activeModuleIds.Contains(module.ModuleId))
+            .ToImmutableArray();
+        var recipes = catalog.Recipes
+            .Where(recipe => activeModuleIds.Contains(recipe.ModuleId))
+            .ToImmutableArray();
+
+        return CompileTimeModuleCatalog.Create(modules, recipes, validations);
     }
 
     private static void ReportOperationManifestFailure(

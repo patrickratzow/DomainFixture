@@ -186,7 +186,9 @@ internal static class FixtureTestSourceEmitter
             var matchingRules = validationRulesTypeKey is null
                 ? new DiscoveredDomainConstraint[0]
                 : rules
-                    .Where(rule => rule.SourceTypeKey == validationRulesTypeKey)
+                    .Where(rule =>
+                        rule.SourceTypeKey == validationRulesTypeKey &&
+                        rule.SubjectTypeKey == configuration.SubjectTypeName)
                     .Concat(ConventionConstraintProvider.Create(
                         configuration,
                         profileResult.Profile,

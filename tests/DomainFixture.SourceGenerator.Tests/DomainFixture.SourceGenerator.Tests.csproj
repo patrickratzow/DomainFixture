@@ -20,6 +20,7 @@
     <ItemGroup>
         <ProjectReference Include="..\..\src\DomainFixture\DomainFixture.csproj" />
         <ProjectReference Include="..\..\src\DomainFixture.SourceGenerator\DomainFixture.SourceGenerator.csproj" />
+        <ProjectReference Include="..\..\src\DomainFixture.Modules.FluentValidation\DomainFixture.Modules.FluentValidation.csproj" />
         <ProjectReference Include="..\..\src\DomainFixture.TestGenerator\DomainFixture.TestGenerator.csproj" />
         <ProjectReference Include="..\DomainFixture.Tests.Domain\DomainFixture.Tests.Domain.csproj" />
     </ItemGroup>

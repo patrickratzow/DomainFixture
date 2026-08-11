@@ -10,8 +10,8 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 namespace DomainFixture.SourceGenerator.Extraction;
 
 /// <summary>
-/// Adapts FluentValidation syntax into framework-neutral domain constraints.
-/// Boundary selection happens later and has no FluentValidation dependency.
+/// Legacy same-compilation compatibility. New integrations use the standalone
+/// DomainFixture.Modules.FluentValidation analyzer and referenced-assembly manifests.
 /// </summary>
 internal static class FluentValidationConstraintAdapter
 {

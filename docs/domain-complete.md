@@ -1,7 +1,8 @@
 # Domain Complete direction
 
 DomainFixture should generate tests from a domain contract, not from one validation library.
-FluentValidation is an adapter that contributes constraints; nullability, naming conventions,
+The standalone [`DomainFixture.Modules.FluentValidation`](fluentvalidation-module.md) analyzer
+contributes constraints and neutral validation adapters; nullability, naming conventions,
 constructors, attributes, and future user-defined adapters can contribute the same model.
 
 The generation pipeline is:
