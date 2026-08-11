@@ -12,7 +12,8 @@ dotnet test examples/OrderingShipping/OrderingShipping.ExampleTests/OrderingShip
 
 The test project materializes source-generator output under `obj/Generated`. This makes generated
 factories and test suites navigable in IDEs after a build; for example, search that directory for
-`OrderFixture.Factory.g.cs`. The files remain compiler output and should not be committed.
+`OrderFixture.Factory.g.cs`. The directory is refreshed before compilation so deleted recipes do
+not leave stale generated files. The files remain compiler output and should not be committed.
 
 The project currently runs 44 tests. DomainFixture generates most of the construction, equality, state, transition, rejection, and identity-preservation cases; the remaining tests describe event payloads and the end-to-end application workflow.
 
@@ -88,6 +89,11 @@ choices, but it is an override—not required setup.
 The profile also enables `options.Conventions().AutoSynthesizeRecipes()`. Any recipe without an
 explicit `Baseline`, `Synthesize`, or `FromTransition` source therefore receives a synthesized
 valid baseline. Explicit sources always take precedence.
+
+Leaf value objects do not need empty fixture declarations. `ShippingAddress`, `DeliveryAddress`,
+and `OrderLine` are discovered and composed recursively while synthesizing their aggregate roots.
+A dedicated fixture is only useful when a type needs named recipes, generated behavioral tests, or
+a typed factory consumed directly by handwritten tests.
 
 The recipes remain focused on behavior:
 
