@@ -20,9 +20,6 @@ public interface IFixtureGenerationOptions
 
     IFixtureMutationOptions Mutations();
 
-    [Obsolete("Install DomainFixture.Modules.FluentValidation in the validator project; module adapters are discovered automatically.")]
-    IFixtureValidationOptions Validation();
-
     IFixtureOperationOptions Operations();
 
     IFixtureValueOptions Values();
@@ -50,7 +47,7 @@ public interface IFixtureOperationOptions
         Expression<Func<TResult, TSubject>> value);
 }
 
-[Obsolete("Install DomainFixture.Modules.FluentValidation in the validator project; module adapters are discovered automatically.")]
+[Obsolete("FluentValidation is discovered automatically by DomainFixture.SourceGenerator; explicit module activation is no longer required.")]
 public interface IFixtureValidationOptions
 {
     IFixtureValidationOptions UseFluentValidation();

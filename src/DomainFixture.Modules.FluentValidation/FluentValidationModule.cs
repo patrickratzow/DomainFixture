@@ -3,10 +3,15 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace DomainFixture.Modules.FluentValidation;
 
-[Generator]
-public sealed class FluentValidationDomainFixtureModuleGenerator : IIncrementalGenerator
+/// <summary>
+/// Registers FluentValidation discovery and emission into a host source generator.
+/// This type is a module component; it is not a Roslyn generator entry point.
+/// </summary>
+public sealed class FluentValidationModule
 {
-    public void Initialize(IncrementalGeneratorInitializationContext context)
+    public string Id => FluentValidationModuleConstants.ModuleId;
+
+    public void Register(IncrementalGeneratorInitializationContext context)
     {
         var validators = context.SyntaxProvider.CreateSyntaxProvider(
                 static (node, _) => node is ClassDeclarationSyntax { BaseList: not null },

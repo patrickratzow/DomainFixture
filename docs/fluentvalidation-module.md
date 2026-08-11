@@ -1,41 +1,50 @@
 # FluentValidation module
 
-`DomainFixture.Modules.FluentValidation` is a standalone Roslyn analyzer. It owns every
-FluentValidation-specific operation used by the module path:
+FluentValidation support lives in the separate `DomainFixture.Modules.FluentValidation` library
+and is composed into the original `DomainFixture.SourceGenerator`. The module library contains no
+`[Generator]` entry point; `DomainFixtureIncrementalGenerator` is the only Roslyn generator.
+
+The internal module owns:
 
 - semantic discovery of `AbstractValidator<T>` / `IValidator<T>`;
-- conversion of supported rule chains into neutral `DomainContractManifestAttribute` constraints;
-- generation of an `IFixtureValidator<T>` adapter for each validated subject;
-- module and validation-binding manifests consumed by the downstream DomainFixture source generator.
+- same-compilation constraint contributions to the central generator pipeline;
+- conversion of supported rules into neutral `DomainContractManifestAttribute` constraints;
+- generation of one `IFixtureValidator<T>` adapter per validated subject;
+- module and validation-binding metadata for a downstream test compilation.
 
-The core source generator does not load the module or call FluentValidation. Generated tests invoke
-the module-owned adapter through `DomainFixture.Validation.IFixtureValidator<T>`.
+The central generation pipeline remains framework-neutral. FluentValidation API calls exist only
+inside the module-owned adapter emitted into the validator assembly.
 
 ## Project wiring
 
-Install the module analyzer in the project that contains the validators:
+The project containing validators references FluentValidation, DomainFixture, and the normal
+DomainFixture source-generator distribution. Packaged distributions place the FluentValidation
+module dependency beside the main analyzer DLL; no second generator is installed:
 
 ```xml
 <ItemGroup>
   <PackageReference Include="FluentValidation" Version="10.3.6" />
   <PackageReference Include="DomainFixture" Version="..." />
-  <PackageReference Include="DomainFixture.Modules.FluentValidation"
-                    Version="..."
-                    PrivateAssets="all" />
+  <PackageReference Include="DomainFixture.SourceGenerator" Version="..." PrivateAssets="all" />
 </ItemGroup>
 ```
 
-For local project references, the equivalent is:
+For repository project references, the generator is the same analyzer used everywhere else:
 
 ```xml
+<ProjectReference Include="..\DomainFixture.SourceGenerator\DomainFixture.SourceGenerator.csproj"
+                  OutputItemType="Analyzer"
+                  ReferenceOutputAssembly="false" />
 <ProjectReference Include="..\DomainFixture.Modules.FluentValidation\DomainFixture.Modules.FluentValidation.csproj"
                   OutputItemType="Analyzer"
                   ReferenceOutputAssembly="false" />
 ```
 
-The downstream test project references the validator/domain assembly and the normal DomainFixture
-source generator. It does not need `.UseFluentValidation()` or `RulesFrom<TValidator>()` for the
-module default:
+The second local reference only makes the generator's library dependency available in Roslyn's
+analyzer load context. It has no generator entry point and therefore does not execute independently.
+
+The test project references the compiled validator/domain assembly and the same source generator.
+It does not need `.UseFluentValidation()` or `RulesFrom<TValidator>()`:
 
 ```csharp
 public sealed class UsernameFixture : IFixtureTestConfiguration<Username>
@@ -47,7 +56,7 @@ public sealed class UsernameFixture : IFixtureTestConfiguration<Username>
 }
 ```
 
-An explicit `ValidateWith(...)` declaration still overrides the contributed adapter.
+An explicit `ValidateWith(...)` declaration remains authoritative.
 
 ## Supported rules
 
@@ -65,18 +74,20 @@ The initial module supports constant, direct-property rules:
 | `GreaterThan(min)` | `domainfixture.int32.greater-than` |
 | `LessThan(max)` | `domainfixture.int32.less-than` |
 
-`WithErrorCode("...")` is preserved when its argument is constant. Rules must originate from a
-direct `RuleFor(subject => subject.Property)` chain. Unsupported rules produce `DFV001`; malformed
-supported rules produce `DFV002`; unusable validator types produce `DFV003`; multiple validators for
-one subject produce `DFV004`.
+`WithErrorCode("...")` is preserved when constant. Rules must originate from a direct
+`RuleFor(subject => subject.Property)` chain. Unsupported rules produce `DFV001`; malformed rules
+produce `DFV002`; unusable validator types produce `DFV003`; multiple validators for one subject
+produce `DFV004`.
 
 ## Compilation lifecycle
 
-The validator project compiles the module metadata and public adapter types into its assembly. The
-test project then consumes those facts from the referenced assembly. This two-stage boundary is
-required because Roslyn generators cannot inspect another generator's newly emitted source during
-the same compilation.
+During the validator/domain compilation, `DomainFixtureIncrementalGenerator` invokes the internal
+FluentValidation module. The module contributes constraints directly for same-compilation work and
+emits public adapters plus neutral manifests into the domain assembly.
 
-The generated module marker is metadata attribution only. It is never instantiated. The generated
-adapter is the only executable integration surface and contains the FluentValidation calls and
-`ValidationResult` to `ValidationReport` mapping.
+During the test compilation, another invocation of that same generator reads the referenced
+assembly manifests and generates boundary tests. The two-stage metadata boundary remains necessary
+because a generator cannot semantically inspect source it emitted earlier in its own compilation.
+
+Adapter names use deterministic 64-bit FNV-1a suffixes. The generated module marker is attribution
+metadata only and is never instantiated.

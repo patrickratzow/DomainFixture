@@ -116,13 +116,6 @@ internal static class ValidatorCandidateAnalyzer
         if (validatorInterface?.TypeArguments.Length == 1)
             return validatorInterface.TypeArguments[0];
 
-        for (var current = validatorType.BaseType; current is not null; current = current.BaseType)
-        {
-            if (current.OriginalDefinition.MetadataName == "AbstractValidator`1" &&
-                current.ContainingNamespace.ToDisplayString() == "FluentValidation" &&
-                current.TypeArguments.Length == 1)
-                return current.TypeArguments[0];
-        }
         return null;
     }
 

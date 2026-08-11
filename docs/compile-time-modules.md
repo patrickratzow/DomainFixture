@@ -1,16 +1,17 @@
 # Compile-time modules
 
-DomainFixture modules extend discovery without runtime plugin loading, reflection, dependency
-injection, or a reference from DomainFixture to the integrated framework. A module is an analyzer
-package that translates framework-specific symbols into versioned, framework-neutral assembly
-metadata.
+DomainFixture modules extend discovery without runtime plugin loading, reflection, or dependency
+injection. First-party modules are separate libraries composed through the internal pipeline of the
+single `DomainFixtureIncrementalGenerator` entry point. Module libraries contain no `[Generator]`
+classes. They translate framework-specific symbols into neutral contribution streams and versioned
+assembly metadata.
 
 ```text
 producer compilation                     test compilation
 --------------------                     ----------------
 FluentValidation / MediatR symbols
         |
-module analyzer
+original generator + internal module pipeline
         |
 module + contribution manifests  --->    DomainFixture source generator
                                          |
@@ -19,11 +20,10 @@ module + contribution manifests  --->    DomainFixture source generator
                                          factories + generated tests
 ```
 
-Roslyn generators cannot inspect source emitted by another generator during the same compilation.
-For that reason, contribution manifests are compiled into the producer assembly and consumed from
-that assembly reference by the downstream test project. A module may also run in the test project
-to emit adapter classes whose deterministic names were recorded in producer metadata; all generated
-trees are compiled together even though generators cannot semantically inspect one another's trees.
+The internal pipeline supplies same-compilation facts directly to the central generator.
+Contribution manifests are also compiled into the producer assembly for consumption by a
+downstream test project. This second representation remains necessary because Roslyn generators
+cannot semantically inspect their own newly emitted source during the current compilation.
 
 ## Stable contracts
 
@@ -81,8 +81,7 @@ MediatR reference or a hard-coded request convention.
 
 ## Validation module
 
-The concrete [`DomainFixture.Modules.FluentValidation`](fluentvalidation-module.md) analyzer uses
-this path today.
+The internal [FluentValidation module](fluentvalidation-module.md) uses this path today.
 
 The FluentValidation module has two responsibilities:
 
@@ -102,8 +101,9 @@ The FluentValidation module has two responsibilities:
 
 The adapter owns all FluentValidation API calls and maps their result to DomainFixture's neutral
 `ValidationReport`. Generated boundary tests instantiate only that adapter through
-`IFixtureValidator<T>`. The core generator does not reference FluentValidation, discover its types,
-or emit its API calls.
+`IFixtureValidator<T>`. The generator assembly has no FluentValidation package reference. Its
+internal module recognizes FluentValidation symbols semantically and owns all emitted framework
+API calls.
 
 An explicit fixture validator remains authoritative over a module default. Likewise, an explicit
 fixture recipe wins over an equivalent contributed recipe.
@@ -120,9 +120,11 @@ model, boundary generators, deterministic naming, and framework emitters.
 In other words, manifests extend the shared domain specification; the TestGenerator SDK extends
 source production. Both paths remain upfront and independently compilable.
 
-## Package shape
+## External module escape hatch
 
-A typical integration NuGet package contains:
+An independently authored module cannot be injected into an already compiled generator pipeline.
+External integrations therefore retain the metadata-producer escape hatch. A typical external
+integration NuGet package contains:
 
 ```text
 analyzers/dotnet/cs/Acme.DomainFixture.MediatR.dll

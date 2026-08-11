@@ -5,14 +5,11 @@ namespace DomainFixture.SourceGenerator.Models;
 
 internal sealed class DomainConstraintProviderSet
 {
-    public IncrementalValueProvider<ImmutableArray<ConstraintExtractionResult>> SourceResults { get; }
     public IncrementalValueProvider<ImmutableArray<ConstraintExtractionResult>> AllResults { get; }
 
     public DomainConstraintProviderSet(
-        IncrementalValueProvider<ImmutableArray<ConstraintExtractionResult>> sourceResults,
         IncrementalValueProvider<ImmutableArray<ConstraintExtractionResult>> allResults)
     {
-        SourceResults = sourceResults;
         AllResults = allResults;
     }
 }

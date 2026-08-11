@@ -12,10 +12,19 @@
 
     <ItemGroup>
       <ProjectReference Include="..\..\src\DomainFixture\DomainFixture.csproj" />
+      <ProjectReference Include="..\..\src\DomainFixture.SourceGenerator\DomainFixture.SourceGenerator.csproj"
+                        OutputItemType="Analyzer"
+                        ReferenceOutputAssembly="false" />
       <ProjectReference Include="..\..\src\DomainFixture.Modules.FluentValidation\DomainFixture.Modules.FluentValidation.csproj"
                         OutputItemType="Analyzer"
                         ReferenceOutputAssembly="false" />
+      <ProjectReference Include="..\..\src\DomainFixture.TestGenerator\DomainFixture.TestGenerator.csproj"
+                        OutputItemType="Analyzer"
+                        ReferenceOutputAssembly="false" />
       <ProjectReference Include="..\..\src\DomainFixture.Contracts\DomainFixture.Contracts.csproj" />
+      <ProjectReference Include="..\..\src\DomainFixture.Contracts\DomainFixture.Contracts.csproj"
+                        OutputItemType="Analyzer"
+                        ReferenceOutputAssembly="false" />
     </ItemGroup>
 
 </Project>

@@ -7,13 +7,12 @@ using DomainFixture.SourceGenerator.Models;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
-namespace DomainFixture.SourceGenerator.Extraction;
+namespace DomainFixture.SourceGenerator.Modules.FluentValidation;
 
 /// <summary>
-/// Legacy same-compilation compatibility. New integrations use the standalone
-/// DomainFixture.Modules.FluentValidation analyzer and referenced-assembly manifests.
+/// Supplies same-compilation constraints directly to the composed module pipeline.
 /// </summary>
-internal static class FluentValidationConstraintAdapter
+internal static class FluentValidationConstraintProvider
 {
     public static IncrementalValuesProvider<ConstraintExtractionResult> Create(
         IncrementalGeneratorInitializationContext context)
@@ -63,13 +62,7 @@ internal static class FluentValidationConstraintAdapter
         var methodName = ((MemberAccessExpressionSyntax)invocation.Expression)
             .Name.Identifier.ValueText;
         if (!IsSupported(methodName))
-        {
-            return ConstraintExtractionResult.Failure(
-                GeneratorDiagnostics.ConstraintAdapterMissing(
-                    invocation.GetLocation(),
-                    "FluentValidation",
-                    methodName));
-        }
+            return null;
 
         if (!TryGetRuleProperty(semanticModel, invocation, out var property))
         {

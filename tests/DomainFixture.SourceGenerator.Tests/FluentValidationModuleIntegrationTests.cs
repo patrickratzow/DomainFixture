@@ -4,7 +4,6 @@ using System.IO;
 using System.Linq;
 using DomainFixture.Contracts;
 using DomainFixture.Generation.Metadata;
-using DomainFixture.Modules.FluentValidation;
 using DomainFixture.SourceGenerator;
 using DomainFixture.Validation;
 using FluentAssertions;
@@ -32,7 +31,7 @@ public sealed class FluentValidationModuleIntegrationTests
             CreateReferences(),
             new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary));
         GeneratorDriver moduleDriver = CSharpGeneratorDriver.Create(
-            new FluentValidationDomainFixtureModuleGenerator().AsSourceGenerator());
+            new DomainFixtureIncrementalGenerator().AsSourceGenerator());
 
         moduleDriver = moduleDriver.RunGeneratorsAndUpdateCompilation(
             producerCompilation,
@@ -42,7 +41,8 @@ public sealed class FluentValidationModuleIntegrationTests
         var moduleResult = moduleDriver.GetRunResult();
         moduleResult.Diagnostics.Where(diagnostic => diagnostic.Severity == DiagnosticSeverity.Error)
             .Should().BeEmpty();
-        var moduleSource = moduleResult.GeneratedTrees.Single().ToString();
+        var moduleSource = moduleResult.GeneratedTrees.Single(tree => tree.FilePath.EndsWith(
+            "DomainFixture.FluentValidation.Module.g.cs")).ToString();
         moduleSource.Should()
             .Contain("DomainFixtureModuleManifestAttribute")
             .And.Contain("DomainFixtureValidationManifestAttribute")
@@ -50,6 +50,16 @@ public sealed class FluentValidationModuleIntegrationTests
             .And.Contain("domainfixture.text.minimum-length")
             .And.Contain("domainfixture.int32.inclusive-range")
             .And.Contain("IFixtureValidator<global::Producer.CreateUser>");
+
+        typeof(DomainFixtureIncrementalGenerator).Assembly.GetTypes()
+            .Where(type => type.GetCustomAttributes(typeof(GeneratorAttribute), inherit: false).Length > 0)
+            .Should().ContainSingle()
+            .Which.Should().Be(typeof(DomainFixtureIncrementalGenerator));
+        var moduleAssembly = System.Reflection.Assembly.Load(
+            "DomainFixture.Modules.FluentValidation");
+        moduleAssembly.GetTypes()
+            .Where(type => type.GetCustomAttributes(typeof(GeneratorAttribute), inherit: false).Length > 0)
+            .Should().BeEmpty();
 
         using var producerStream = new MemoryStream();
         var producerEmit = producerOutput.Emit(producerStream);

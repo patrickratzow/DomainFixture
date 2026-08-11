@@ -27,7 +27,7 @@ public class DomainFixtureIncrementalGeneratorTests
         result.GeneratedTrees.Should().Contain(tree => tree.FilePath.EndsWith(
             "DomainFixture.DomainCoverageReport.g.cs"));
         result.GeneratedTrees.Single(tree => tree.FilePath.EndsWith(
-                "DomainFixture.ValidationRuleManifest.g.cs")).ToString().Should()
+                "DomainFixture.FluentValidation.Module.g.cs")).ToString().Should()
             .Contain("DomainContractManifestAttribute")
             .And.Contain("domainfixture.text.length");
         result.GeneratedTrees.Single(tree => tree.FilePath.EndsWith(
@@ -52,7 +52,7 @@ public class DomainFixtureIncrementalGeneratorTests
 
         result.Diagnostics.Should().ContainSingle(diagnostic => diagnostic.Id == "DFG001");
         result.GeneratedTrees.Should().ContainSingle(tree => tree.FilePath.EndsWith(
-            "DomainFixture.ValidationRuleManifest.g.cs"));
+            "DomainFixture.FluentValidation.Module.g.cs"));
     }
 
     [Test]
@@ -311,7 +311,7 @@ public class DomainFixtureIncrementalGeneratorTests
                 diagnostic.GetMessage(null).Contains("Consumer.User.Description") &&
                 diagnostic.GetMessage(null).Contains("no usable record 'with'"));
         result.GeneratedTrees.Should().ContainSingle(tree => tree.FilePath.EndsWith(
-            "DomainFixture.ValidationRuleManifest.g.cs"));
+            "DomainFixture.FluentValidation.Module.g.cs"));
     }
 
     [Test]
@@ -330,7 +330,7 @@ public class DomainFixtureIncrementalGeneratorTests
 
         var result = RunGenerator(source, out var outputCompilation);
 
-        result.Diagnostics.Should().ContainSingle(diagnostic => diagnostic.Id == "DFG015");
+        result.Diagnostics.Should().ContainSingle(diagnostic => diagnostic.Id == "DFV001");
         result.GeneratedTrees.Should().Contain(tree => tree.FilePath.EndsWith(
             "UserFixtureConfiguration.Registration.g.cs"));
         outputCompilation.GetDiagnostics()
@@ -375,7 +375,7 @@ public class DomainFixtureIncrementalGeneratorTests
 
         result.Diagnostics.Should().ContainSingle(diagnostic => diagnostic.Id == "DFG007");
         result.GeneratedTrees.Should().ContainSingle(tree => tree.FilePath.EndsWith(
-            "DomainFixture.ValidationRuleManifest.g.cs"));
+            "DomainFixture.FluentValidation.Module.g.cs"));
     }
 
     [Test]
@@ -769,10 +769,29 @@ using FluentValidation;
 namespace FluentValidation
 {
     public sealed class RuleBuilder<T, TProperty> { }
-    public abstract class AbstractValidator<T>
+    public sealed class ValidationContext<T>
+    {
+        public ValidationContext(T subject) { }
+    }
+    public sealed class ValidationFailure
+    {
+        public string PropertyName => string.Empty;
+        public string ErrorCode => string.Empty;
+        public string ErrorMessage => string.Empty;
+    }
+    public sealed class ValidationResult
+    {
+        public ValidationFailure[] Errors => Array.Empty<ValidationFailure>();
+    }
+    public interface IValidator<T>
+    {
+        ValidationResult Validate(ValidationContext<T> context);
+    }
+    public abstract class AbstractValidator<T> : IValidator<T>
     {
         protected RuleBuilder<T, TProperty> RuleFor<TProperty>(
             Expression<Func<T, TProperty>> expression) => new();
+        public ValidationResult Validate(ValidationContext<T> context) => new();
     }
     public static class DefaultValidatorExtensions
     {
@@ -871,10 +890,29 @@ namespace FluentValidation
     {
     }
 
-    public abstract class AbstractValidator<T>
+    public sealed class ValidationContext<T>
+    {
+        public ValidationContext(T subject) { }
+    }
+    public sealed class ValidationFailure
+    {
+        public string PropertyName => string.Empty;
+        public string ErrorCode => string.Empty;
+        public string ErrorMessage => string.Empty;
+    }
+    public sealed class ValidationResult
+    {
+        public ValidationFailure[] Errors => Array.Empty<ValidationFailure>();
+    }
+    public interface IValidator<T>
+    {
+        ValidationResult Validate(ValidationContext<T> context);
+    }
+    public abstract class AbstractValidator<T> : IValidator<T>
     {
         protected RuleBuilder<T, TProperty> RuleFor<TProperty>(
             Expression<Func<T, TProperty>> expression) => new();
+        public ValidationResult Validate(ValidationContext<T> context) => new();
     }
 
     public static class DefaultValidatorExtensions

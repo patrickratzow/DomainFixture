@@ -4,6 +4,7 @@ using DomainFixture.SourceGenerator.Emission;
 using DomainFixture.SourceGenerator.Extraction;
 using DomainFixture.SourceGenerator.Generation;
 using DomainFixture.SourceGenerator.Models;
+using DomainFixture.SourceGenerator.Modules;
 using DomainFixture.SourceGenerator.Normalization;
 using DomainFixture.TestGenerator.Modules;
 using DomainFixture.Contracts;
@@ -18,9 +19,14 @@ public sealed class DomainFixtureIncrementalGenerator : IIncrementalGenerator
 {
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
+        var moduleConstraints = DomainFixtureSourceModulePipeline.CreateDefault()
+            .Register(context);
+
         var configurations = FluentFixtureConfigurationProvider.Create(context);
         var generationProfile = GenerationProfileProvider.Create(context);
-        var constraintProviders = DomainConstraintProviderCatalog.Create(context);
+        var constraintProviders = DomainConstraintProviderCatalog.Create(
+            context,
+            moduleConstraints);
         var scenarioResults = DomainScenarioManifestProvider.Create(context);
         var operationManifests = DomainOperationManifestProvider.Create(context);
         var moduleManifests = DomainFixtureModuleManifestProvider.Create(context);
@@ -103,11 +109,6 @@ public sealed class DomainFixtureIncrementalGenerator : IIncrementalGenerator
                 productionContext.ReportDiagnostic(diagnostic);
             }
         });
-
-        context.RegisterSourceOutput(
-            constraintProviders.SourceResults,
-            static (productionContext, results) =>
-                ValidationRuleManifestEmitter.Emit(productionContext, results));
 
         var constraints = constraintProviders.AllResults.Select(static (results, _) => results
             .Where(result => result.Constraint is not null)

@@ -1,8 +1,8 @@
 # Domain Complete direction
 
 DomainFixture should generate tests from a domain contract, not from one validation library.
-The standalone [`DomainFixture.Modules.FluentValidation`](fluentvalidation-module.md) analyzer
-contributes constraints and neutral validation adapters; nullability, naming conventions,
+The internal [FluentValidation module](fluentvalidation-module.md), composed into the original
+source generator, contributes constraints and neutral validation adapters; nullability, naming conventions,
 constructors, attributes, and future user-defined adapters can contribute the same model.
 
 The generation pipeline is:
@@ -25,7 +25,7 @@ round trips, and synchronous entity transitions. Records use a state-preserving 
 conventional value objects use a real constructor or static factory. Construction discovery maps
 accessible constructor parameters and `From`/`Create`/`Of` parameters to readable properties by
 name and type, falling back only when a type match is unique.
-A recognized rule without an adapter produces `DFG015`; an interpretable constraint without a
+A recognized FluentValidation rule without module support produces `DFV001`; an interpretable constraint without a
 boundary provider produces `DFG017`. Unsupported or unresolved scenarios produce `DFG021` through
 `DFG024`. Ambiguous operation parameter mapping produces `DFG025`. Missing coverage must not be
 silent.
