@@ -27,6 +27,14 @@ internal sealed class FixtureGenerationSpec
     public string? IdentityMemberPath { get; }
     public bool UsesSynthesizedBaseline { get; }
     public ImmutableArray<DomainStateExpectationSpec> StateExpectations { get; }
+    public RecipeTransitionSourceSpec? TransitionSource { get; }
+    public ImmutableArray<InferredValueSpec> InferredValues { get; }
+
+    public bool UsesGeneratedBaseline =>
+        UsesSynthesizedBaseline || TransitionSource is not null;
+
+    public bool HasBaselineSource =>
+        !string.IsNullOrWhiteSpace(BaselineFactoryExpression) || UsesGeneratedBaseline;
 
     public FixtureGenerationSpec(
         string configurationName,
@@ -49,7 +57,9 @@ internal sealed class FixtureGenerationSpec
         ImmutableArray<DomainTransitionSpec> transitions = default,
         string? identityMemberPath = null,
         bool usesSynthesizedBaseline = false,
-        ImmutableArray<DomainStateExpectationSpec> stateExpectations = default)
+        ImmutableArray<DomainStateExpectationSpec> stateExpectations = default,
+        RecipeTransitionSourceSpec? transitionSource = null,
+        ImmutableArray<InferredValueSpec> inferredValues = default)
     {
         ConfigurationName = configurationName;
         NamespaceName = namespaceName;
@@ -76,6 +86,10 @@ internal sealed class FixtureGenerationSpec
         StateExpectations = stateExpectations.IsDefault
             ? ImmutableArray<DomainStateExpectationSpec>.Empty
             : stateExpectations;
+        TransitionSource = transitionSource;
+        InferredValues = inferredValues.IsDefault
+            ? ImmutableArray<InferredValueSpec>.Empty
+            : inferredValues;
     }
 
     public FixtureGenerationSpec WithBaselineFactoryExpression(string baselineFactoryExpression) =>
@@ -100,5 +114,33 @@ internal sealed class FixtureGenerationSpec
             Transitions,
             IdentityMemberPath,
             UsesSynthesizedBaseline,
-            StateExpectations);
+            StateExpectations,
+            TransitionSource,
+            InferredValues);
+
+    public FixtureGenerationSpec WithSynthesizedBaseline() =>
+        new(
+            ConfigurationName,
+            NamespaceName,
+            RecipeName,
+            SubjectTypeName,
+            SubjectTypeShortName,
+            BaselineFactoryExpression,
+            ValidatorFactoryExpression,
+            ValidationRulesTypeKey,
+            SubjectProperties,
+            IsRecord,
+            ReconstructionConstructors,
+            CanUseDerivedReconstruction,
+            HasValueEqualitySemantics,
+            EquivalentCopyExpression,
+            ConstructionOperations,
+            Location,
+            CanExposePublicFactory,
+            Transitions,
+            IdentityMemberPath,
+            usesSynthesizedBaseline: true,
+            StateExpectations,
+            TransitionSource,
+            InferredValues);
 }

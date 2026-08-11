@@ -10,6 +10,10 @@ From the repository root:
 dotnet test examples/OrderingShipping/OrderingShipping.ExampleTests/OrderingShipping.ExampleTests.csproj
 ```
 
+The test project materializes source-generator output under `obj/Generated`. This makes generated
+factories and test suites navigable in IDEs after a build; for example, search that directory for
+`OrderFixture.Factory.g.cs`. The files remain compiler output and should not be committed.
+
 The project currently runs 44 tests. DomainFixture generates most of the construction, equality, state, transition, rejection, and identity-preservation cases; the remaining tests describe event payloads and the end-to-end application workflow.
 
 ## Architecture
@@ -62,21 +66,33 @@ PlaceOrder
 
 ## DomainFixture configuration
 
-The central profile supplies valid business primitives once:
+The example profile contains no fixture values. DomainFixture recursively discovers conventional
+value construction from the domain symbols:
 
-```csharp
-options.Values()
-    .For<int>(() => 2)
-    .For<Sku>(() => Sku.From("DDD-BOOK"))
-    .For<Money>(() => Money.Usd(25m))
-    .For<TrackingNumber>(() => TrackingNumber.From("TRACK-123"));
-```
+- `OrderId.From(Guid)`, `CustomerId.From(Guid)`, and other GUID-backed values receive a fresh
+  non-empty `Guid` on every factory invocation;
+- `Sku.From(string)` and `TrackingNumber.From(string)` receive a non-empty string;
+- `Money.Usd(decimal)` is selected because it is the single unambiguous static factory returning
+  `Money`;
+- unconstrained integral and decimal baselines use positive `1`, avoiding the common invalid zero
+  quantity/count case;
+- `ShippingAddress`, `DeliveryAddress`, `OrderLine`, and their collections are composed recursively.
+
+Generated strings come from one thread-safe sequence shared by every generated factory in the test
+assembly. Length constraints are respected, and a finite string space fails on exhaustion rather
+than reusing a value. Explicit configured values still remain intentionally reusable overrides.
+
+Explicit `options.Values().For<T>(...)` remains available when the domain has multiple meaningful
+choices, but it is an override—not required setup.
+
+The profile also enables `options.Conventions().AutoSynthesizeRecipes()`. Any recipe without an
+explicit `Baseline`, `Synthesize`, or `FromTransition` source therefore receives a synthesized
+valid baseline. Explicit sources always take precedence.
 
 The recipes remain focused on behavior:
 
 ```csharp
 fixture.Recipe("Pending")
-    .Synthesize()
     .State("Starts pending", shipment => shipment.Status, ShipmentStatus.Pending)
     .Transition(
         "Dispatch",
@@ -84,6 +100,30 @@ fixture.Recipe("Pending")
         shipment => shipment.Status,
         ShipmentStatus.Dispatched);
 ```
+
+Later valid states reuse those named transitions instead of rebuilding the aggregate by hand:
+
+```csharp
+fixture.Recipe("Dispatched")
+    .FromTransition("Pending", "Dispatch")
+    .Transition(
+        "Deliver",
+        shipment => shipment.Deliver(),
+        shipment => shipment.Status,
+        ShipmentStatus.Delivered);
+
+fixture.Recipe("Delivered")
+    .FromTransition("Dispatched", "Deliver");
+```
+
+The same applies to Orders: the Cancelled recipe is simply
+`.FromTransition("Placed", "Cancel")`; it contains no duplicate IDs, address, line items, or manual
+aggregate construction.
+
+`FromTransition` asks the generator to create the source recipe, resolve any automatic command
+arguments through the same valid-value pipeline, apply the transition, and return the resulting
+fresh aggregate. Recipes can form an acyclic state graph; missing transitions and dependency
+cycles are reported as generation diagnostics.
 
 DomainFixture discovers `Create` factories and recursively builds the graph. For an Order this means a configured `OrderId`, `CustomerId`, `Sku`, and `Money`, a generated `ShippingAddress`, a generated `OrderLine`, and a generated one-element `IReadOnlyList<OrderLine>`.
 

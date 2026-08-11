@@ -7,7 +7,6 @@ public sealed class ShippingAddressFixture : IFixtureTestConfiguration<ShippingA
 {
     public void Configure(IFixtureTestBuilder<ShippingAddress> fixture)
     {
-        fixture.Recipe("Valid")
-            .Synthesize();
+        fixture.Recipe("Valid");
     }
 }

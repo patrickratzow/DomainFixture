@@ -32,7 +32,7 @@ namespace DomainFixture.Tests.Generation
         public void Valid_Transition_Can_reserve_ReachesExpectedState()
         {
             Subscription subject = SubscriptionFixtureFactory.Valid.Create();
-            var result = subject.CanReserve(0);
+            var result = subject.CanReserve(1);
             Func<bool, bool> predicate = result => result;
             Assert.That(predicate(result), Is.True);
         }
@@ -41,7 +41,7 @@ namespace DomainFixture.Tests.Generation
         public void Valid_Transition_Activate_ReachesExpectedState()
         {
             Subscription subject = SubscriptionFixtureFactory.Valid.Create();
-            subject = subject.Activate(0);
+            subject = subject.Activate(1);
             Assert.That(subject.Status, Is.EqualTo(SubscriptionStatus.Active));
         }
 
@@ -50,7 +50,7 @@ namespace DomainFixture.Tests.Generation
         {
             Subscription subject = SubscriptionFixtureFactory.Valid.Create();
             var identity = subject.Id;
-            subject = subject.Activate(0);
+            subject = subject.Activate(1);
             Assert.That(subject.Id, Is.EqualTo(identity));
         }
 

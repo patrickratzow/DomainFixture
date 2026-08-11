@@ -36,7 +36,8 @@ internal static class FixtureFactorySourceEmitter
             source = GeneratedSourceAliasRewriter.Rewrite(
                 source,
                 configurations.SelectMany(configuration =>
-                    GeneratedTypeReferenceCollector.Collect(configuration)),
+                    GeneratedTypeReferenceCollector.Collect(configuration))
+                    .Concat(new[] { UniqueValueSourceEmitter.TypeName }),
                 group.Key.NamespaceName);
             var hintName = CreateHintName(group.Key.NamespaceName, group.Key.ConfigurationName);
             context.AddSource(hintName, SourceText.From(source, Encoding.UTF8));

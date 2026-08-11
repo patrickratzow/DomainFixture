@@ -499,6 +499,7 @@ internal static class FixtureTestSourceEmitter
                         matchingRules.Select(rule => rule.Contract).ToArray(),
                         scenarioOutcomes,
                         profileResult.Profile.ConfiguredValues,
+                        configuration.InferredValues,
                         nestedTypeName =>
                         {
                             var nestedConfiguration = configurationResult.Configurations
@@ -566,6 +567,7 @@ internal static class FixtureTestSourceEmitter
                 configuration.SubjectTypeName);
             if (configuredRejection is not null)
                 generatedTypeReferences.Add(configuredRejection.ExceptionTypeName);
+            generatedTypeReferences.Add(UniqueValueSourceEmitter.TypeName);
             source = GeneratedSourceAliasRewriter.Rewrite(
                 source,
                 generatedTypeReferences,

@@ -111,10 +111,12 @@ internal static class FluentFixtureConfigurationProvider
         string? recipeName = null;
         IMethodSymbol? baselineFactory = null;
         var synthesizeRequested = false;
+        RecipeTransitionSourceSpec? transitionSource = null;
         IMethodSymbol? validatorFactory = null;
         INamedTypeSymbol? validationRulesType = null;
         var transitions = ImmutableArray.CreateBuilder<DomainTransitionSpec>();
         var stateExpectations = ImmutableArray.CreateBuilder<DomainStateExpectationSpec>();
+        var inferredValues = ImmutableArray.CreateBuilder<InferredValueSpec>();
 
         foreach (var invocation in EnumerateChain(outerInvocation))
         {
@@ -142,6 +144,25 @@ internal static class FluentFixtureConfigurationProvider
                     synthesizeRequested = true;
                     break;
 
+                case "FromTransition" when invocation.ArgumentList.Arguments.Count == 2:
+                    var sourceRecipe = semanticModel.GetConstantValue(
+                        invocation.ArgumentList.Arguments[0].Expression);
+                    var sourceTransition = semanticModel.GetConstantValue(
+                        invocation.ArgumentList.Arguments[1].Expression);
+                    if (sourceRecipe.HasValue &&
+                        sourceRecipe.Value is string sourceRecipeName &&
+                        !string.IsNullOrWhiteSpace(sourceRecipeName) &&
+                        sourceTransition.HasValue &&
+                        sourceTransition.Value is string sourceTransitionName &&
+                        !string.IsNullOrWhiteSpace(sourceTransitionName))
+                    {
+                        transitionSource = new RecipeTransitionSourceSpec(
+                            sourceRecipeName,
+                            sourceTransitionName,
+                            invocation.GetLocation());
+                    }
+                    break;
+
                 case "ValidateWith" when invocation.ArgumentList.Arguments.Count == 1:
                     validatorFactory = ResolveMethodGroup(
                         semanticModel,
@@ -158,7 +179,8 @@ internal static class FluentFixtureConfigurationProvider
                         subjectType,
                         invocation,
                         isRejection: false,
-                        diagnostics);
+                        diagnostics,
+                        inferredValues);
                     if (transition is not null)
                         transitions.Add(transition);
                     break;
@@ -169,7 +191,8 @@ internal static class FluentFixtureConfigurationProvider
                         subjectType,
                         invocation,
                         isRejection: true,
-                        diagnostics);
+                        diagnostics,
+                        inferredValues);
                     if (rejection is not null)
                         transitions.Add(rejection);
                     break;
@@ -206,8 +229,11 @@ internal static class FluentFixtureConfigurationProvider
                 duplicate.Key));
         }
 
-        if (string.IsNullOrWhiteSpace(recipeName) ||
-            baselineFactory is null && !synthesizeRequested)
+        var baselineDeclarationCount =
+            (baselineFactory is null ? 0 : 1) +
+            (synthesizeRequested ? 1 : 0) +
+            (transitionSource is null ? 0 : 1);
+        if (string.IsNullOrWhiteSpace(recipeName) || baselineDeclarationCount > 1)
         {
             diagnostics.Add(GeneratorDiagnostics.IncompleteConfiguration(
                 outerInvocation.GetLocation(),
@@ -263,6 +289,15 @@ internal static class FluentFixtureConfigurationProvider
             semanticModel.Compilation.Assembly,
             diagnostics,
             outerInvocation.GetLocation());
+        inferredValues.AddRange(
+            ConventionalValueExpressionDiscovery.DiscoverReferencedValues(
+                subjectType,
+                semanticModel.Compilation.Assembly));
+        var distinctInferredValues = inferredValues
+            .GroupBy(value => value.TypeName, System.StringComparer.Ordinal)
+            .Select(group => group.First())
+            .OrderBy(value => value.TypeName, System.StringComparer.Ordinal)
+            .ToImmutableArray();
         return new FixtureGenerationSpec(
             configurationType.Name,
             namespaceName,
@@ -287,7 +322,9 @@ internal static class FluentFixtureConfigurationProvider
             transitions.ToImmutable(),
             identityMemberPath: null,
             usesSynthesizedBaseline: synthesizeRequested,
-            stateExpectations: stateExpectations.ToImmutable());
+            stateExpectations: stateExpectations.ToImmutable(),
+            transitionSource: transitionSource,
+            inferredValues: distinctInferredValues);
     }
 
     private static DomainTransitionSpec? ParseTransition(
@@ -295,7 +332,8 @@ internal static class FluentFixtureConfigurationProvider
         ITypeSymbol subjectType,
         InvocationExpressionSyntax invocation,
         bool isRejection,
-        ImmutableArray<Diagnostic>.Builder diagnostics)
+        ImmutableArray<Diagnostic>.Builder diagnostics,
+        ImmutableArray<InferredValueSpec>.Builder inferredValues)
     {
         var nameExpression = invocation.ArgumentList.Arguments[0].Expression;
         var nameValue = semanticModel.GetConstantValue(nameExpression);
@@ -345,6 +383,10 @@ internal static class FluentFixtureConfigurationProvider
         for (var index = 0; index < commandMethod.Parameters.Length; index++)
         {
             var parameter = commandMethod.Parameters[index];
+            inferredValues.AddRange(
+                ConventionalValueExpressionDiscovery.DiscoverValue(
+                    parameter.Type,
+                    semanticModel.Compilation.Assembly));
             var argumentExpression = commandInvocation.ArgumentList.Arguments[index].Expression;
             var isAuto = IsFixtureValueAuto(semanticModel, argumentExpression);
             var emittedArgument = isAuto

@@ -16,11 +16,15 @@ public sealed class GeneratedFixtureTests
         var second = OrderFixtureFactory.Placed.Create();
 
         first.Should().NotBeSameAs(second);
+        first.Id.Should().NotBe(second.Id);
+        first.CustomerId.Should().NotBe(second.CustomerId);
+        first.Id.Value.Should().NotBe(first.CustomerId.Value);
+        first.Lines[0].Sku.Should().NotBe(second.Lines[0].Sku);
         first.Status.Should().Be(OrderStatus.Placed);
         first.Lines.Should().ContainSingle();
-        first.Lines[0].Quantity.Should().Be(2);
-        first.Lines[0].Sku.Should().Be(Sku.From("DDD-BOOK"));
-        first.Total.Should().Be(Money.Usd(50m));
+        first.Lines[0].Quantity.Should().Be(1);
+        first.Lines[0].Sku.Value.Should().NotBeNullOrWhiteSpace();
+        first.Total.Should().Be(Money.Usd(1m));
         first.DomainEvents.Should().ContainSingle()
             .Which.Should().BeOfType<OrderPlaced>();
     }

@@ -27,6 +27,15 @@ public interface IFixtureRecipeBuilder<TSubject>
     /// </summary>
     IFixtureRecipeBuilder<TSubject> Synthesize();
 
+    /// <summary>
+    /// Derives this recipe's valid baseline by creating another recipe and applying one of its
+    /// declared successful transitions. Transition arguments marked with <see cref="FixtureValue.Auto{T}"/>
+    /// are resolved through the normal valid-value pipeline.
+    /// </summary>
+    IFixtureRecipeBuilder<TSubject> FromTransition(
+        string recipeName,
+        string transitionName);
+
     IFixtureRecipeBuilder<TSubject> ValidateWith<TValidator>(Func<TValidator> factory)
         where TValidator : IFixtureValidator<TSubject>;
 

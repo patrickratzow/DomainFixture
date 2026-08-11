@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using DomainFixture.Tests.Domain.Entities;
 using DomainFixture.Tests.Domain.ValueObjects;
 using DomainFixture.Tests.Generation;
@@ -56,9 +57,12 @@ public sealed class GeneratedFixtureFactoryTests
     public void SynthesizedSubscriptionFactory_ShouldBeUsableFromHandwrittenTests()
     {
         var subject = SubscriptionFixtureFactory.Valid.Create();
+        var another = SubscriptionFixtureFactory.Valid.Create();
 
-        subject.PlanName.Should().Be("a");
-        subject.Seats.Should().Be(0);
+        subject.PlanName.Should().NotBeNullOrWhiteSpace();
+        subject.PlanName.Should().NotBe(another.PlanName);
+        subject.Id.Should().NotBe(another.Id);
+        subject.Seats.Should().Be(1);
         subject.Id.Should().NotBe(Guid.Empty);
         subject.Status.Should().Be(SubscriptionStatus.Pending);
         subject.Details.Status.Should().Be(SubscriptionStatus.Pending);
@@ -69,7 +73,7 @@ public sealed class GeneratedFixtureFactoryTests
     {
         var subject = ResultDisplayNameFixtureFactory.Valid.Create();
 
-        subject.Value.Should().Be("a");
+        subject.Value.Should().NotBeNullOrWhiteSpace();
         ResultDisplayName.Create(string.Empty).IsSuccess.Should().BeFalse();
     }
 
@@ -81,8 +85,9 @@ public sealed class GeneratedFixtureFactoryTests
         subject.Owner.Value.Should().Be("baseline");
         subject.Participants.Should().ContainSingle()
             .Which.Value.Should().Be("baseline");
-        subject.ParticipantsByRole.Should().ContainKey("a")
-            .WhoseValue.Value.Should().Be("baseline");
+        subject.ParticipantsByRole.Should().ContainSingle();
+        subject.ParticipantsByRole.Keys.Single().Should().NotBeNullOrWhiteSpace();
+        subject.ParticipantsByRole.Values.Single().Value.Should().Be("baseline");
         subject.BillingCycle.Should().Be(BillingCycle.Monthly);
     }
 }

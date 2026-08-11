@@ -63,7 +63,7 @@ throws `InvalidOperationException`. Their generated factories are exercised by h
 show that state changes never leak into later creations.
 
 The Subscription snapshots make the normalized domain-spec direction concrete. `.Synthesize()`
-selects `Subscription.Create` and supplies a deterministic string, integer, and `Guid`. The same
+selects `Subscription.Create` and supplies a deterministic string and integer plus a fresh `Guid`. The same
 expression powers the typed factory and all generated tests. `FixtureValue.Auto<int>()` supplies
 command arguments, `Activate` is treated as an immutable transition that preserves identity,
 `CanReserve` is checked through a synchronous result predicate, and `Details.Status` proves named

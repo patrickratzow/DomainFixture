@@ -107,7 +107,7 @@ public sealed class DomainTransitionGenerationTests
             "subject => subject.ApproveWith(FixtureValue.Auto<int>())"));
 
         result.Diagnostics.Should().BeEmpty();
-        string.Join("\n", result.GeneratedTrees).Should().Contain("subject.ApproveWith(0);");
+        string.Join("\n", result.GeneratedTrees).Should().Contain("subject.ApproveWith(1);");
     }
 
     [Test]
@@ -142,7 +142,7 @@ public sealed class DomainTransitionGenerationTests
 
         result.Diagnostics.Should().BeEmpty();
         string.Join("\n", result.GeneratedTrees).Should()
-            .Contain("var result = subject.TryApprove(0);")
+            .Contain("var result = subject.TryApprove(1);")
             .And.Contain("predicate(result)");
     }
 

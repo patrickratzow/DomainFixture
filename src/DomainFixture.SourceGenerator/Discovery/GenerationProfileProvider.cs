@@ -55,6 +55,7 @@ internal static class GenerationProfileProvider
 
         var semanticModel = context.SemanticModel.Compilation.GetSemanticModel(
             configureDeclaration.SyntaxTree);
+        var autoSynthesizeRecipes = false;
         var useNullability = false;
         var usePropertyNames = false;
         var useImmutableObjects = false;
@@ -78,6 +79,9 @@ internal static class GenerationProfileProvider
 
             switch (method.Name)
             {
+                case "AutoSynthesizeRecipes":
+                    autoSynthesizeRecipes = true;
+                    break;
                 case "UseNullability":
                     useNullability = true;
                     break;
@@ -235,7 +239,8 @@ internal static class GenerationProfileProvider
                 propertyMutations.ToImmutable(),
                 operationRejections.ToImmutable(),
                 operationResults.ToImmutable(),
-                configuredValues.ToImmutable()),
+                configuredValues.ToImmutable(),
+                autoSynthesizeRecipes),
             diagnostics.ToImmutable());
     }
 

@@ -4,6 +4,7 @@ using System.Globalization;
 using System.Linq;
 using DomainFixture.Contracts;
 using DomainFixture.Pipeline;
+using DomainFixture.SourceGenerator.Emission;
 using DomainFixture.SourceGenerator.Models;
 using Microsoft.CodeAnalysis.CSharp;
 
@@ -15,6 +16,7 @@ internal sealed class ValidInstanceValuePlanningRequest
     public IReadOnlyList<DomainConstraintContract> Constraints { get; }
     public Func<string, NestedValidInstanceResolution> NestedResolver { get; }
     public IReadOnlyList<ConfiguredValueSpec> ConfiguredValues { get; }
+    public IReadOnlyList<InferredValueSpec> InferredValues { get; }
     public int Depth { get; }
 
     public ValidInstanceValuePlanningRequest(
@@ -22,6 +24,7 @@ internal sealed class ValidInstanceValuePlanningRequest
         IReadOnlyList<DomainConstraintContract> constraints,
         Func<string, NestedValidInstanceResolution>? nestedResolver = null,
         IReadOnlyList<ConfiguredValueSpec>? configuredValues = null,
+        IReadOnlyList<InferredValueSpec>? inferredValues = null,
         int depth = 0)
     {
         Parameter = parameter ?? throw new ArgumentNullException(nameof(parameter));
@@ -30,6 +33,7 @@ internal sealed class ValidInstanceValuePlanningRequest
             NestedValidInstanceResolution.Uncovered(
                 $"no nested recipe factory is available for '{typeName}'"));
         ConfiguredValues = configuredValues ?? new ConfiguredValueSpec[0];
+        InferredValues = inferredValues ?? new InferredValueSpec[0];
         Depth = depth;
     }
 }
@@ -44,11 +48,13 @@ internal static class ValidInstanceValueProviderPipeline
             new ConfiguredValidValueProvider(),
             new ValidStringValueProvider(),
             new ValidInt32ValueProvider(),
+            new ValidDecimalValueProvider(),
             new ValidBooleanValueProvider(),
             new ValidGuidValueProvider(),
             new ValidDictionaryValueProvider(),
             new ValidCollectionValueProvider(),
-            new ValidNestedValueProvider()
+            new ValidNestedValueProvider(),
+            new InferredValidValueProvider()
         },
         ProviderPipelineMode.FirstHandled);
 
@@ -170,7 +176,8 @@ internal sealed class ValidStringValueProvider :
         var length = Math.Max(minimum, 1);
         if (maximum is not null)
             length = Math.Min(length, maximum.Value);
-        var expression = SymbolDisplay.FormatLiteral(new string('a', length), quote: true);
+        var expression =
+            $"{UniqueValueSourceEmitter.StringFactoryExpression}({length}, {maximum?.ToString(CultureInfo.InvariantCulture) ?? "2147483647"})";
         return ProviderDecision<ValidInstanceValuePlan>.Handled(
             new ValidInstanceValuePlan(
                 request.Parameter.TypeName,
@@ -241,7 +248,7 @@ internal sealed class ValidInt32ValueProvider :
                 $"Int32 constraints have no valid interval ({minimum}..{maximum})");
         }
 
-        var value = Math.Max(minimum, Math.Min(0, maximum));
+        var value = Math.Max(minimum, Math.Min(1, maximum));
         return ProviderDecision<ValidInstanceValuePlan>.Handled(
             new ValidInstanceValuePlan(
                 request.Parameter.TypeName,
@@ -250,6 +257,22 @@ internal sealed class ValidInt32ValueProvider :
                     ? ValidInstanceProvenance.Int32Constraint
                     : ValidInstanceProvenance.PrimitiveDefault));
     }
+}
+
+internal sealed class ValidDecimalValueProvider :
+    IPipelineProvider<ValidInstanceValuePlanningRequest, ValidInstanceValuePlan>
+{
+    public string Id => "domainfixture.valid-values.decimal";
+
+    public ProviderDecision<ValidInstanceValuePlan> Evaluate(
+        ValidInstanceValuePlanningRequest request) =>
+        ValidInstanceTypeNames.IsDecimal(request.Parameter.TypeName)
+            ? ProviderDecision<ValidInstanceValuePlan>.Handled(
+                new ValidInstanceValuePlan(
+                    request.Parameter.TypeName,
+                    "1M",
+                    ValidInstanceProvenance.PrimitiveDefault))
+            : ProviderDecision<ValidInstanceValuePlan>.NotHandled();
 }
 
 internal sealed class ValidBooleanValueProvider :
@@ -279,8 +302,8 @@ internal sealed class ValidGuidValueProvider :
             ? ProviderDecision<ValidInstanceValuePlan>.Handled(
                 new ValidInstanceValuePlan(
                     request.Parameter.TypeName,
-                    "new global::System.Guid(\"00000000-0000-0000-0000-000000000001\")",
-                    ValidInstanceProvenance.DeterministicGuid))
+                    "global::System.Guid.NewGuid()",
+                    ValidInstanceProvenance.UniqueGuid))
             : ProviderDecision<ValidInstanceValuePlan>.NotHandled();
 }
 
@@ -310,6 +333,7 @@ internal sealed class ValidCollectionValueProvider :
                 new DomainConstraintContract[0],
                 request.NestedResolver,
                 request.ConfiguredValues,
+                request.InferredValues,
                 request.Depth + 1));
         if (!element.IsCovered)
         {
@@ -382,6 +406,7 @@ internal sealed class ValidDictionaryValueProvider :
                 new DomainConstraintContract[0],
                 request.NestedResolver,
                 request.ConfiguredValues,
+                request.InferredValues,
                 request.Depth + 1));
 }
 
@@ -395,15 +420,54 @@ internal sealed class ValidNestedValueProvider :
     {
         var nestedType = ValidInstanceTypeNames.UnwrapNullable(request.Parameter.TypeName);
         var nested = request.NestedResolver(nestedType);
-        return nested.IsCovered
-            ? ProviderDecision<ValidInstanceValuePlan>.Handled(
+        if (nested.IsCovered)
+        {
+            return ProviderDecision<ValidInstanceValuePlan>.Handled(
                 new ValidInstanceValuePlan(
                     request.Parameter.TypeName,
                     nested.FactoryExpression!,
-                    ValidInstanceProvenance.NestedRecipe))
+                    ValidInstanceProvenance.NestedRecipe));
+        }
+
+        var hasInferredFallback = request.InferredValues.Any(value =>
+            ValidInstanceTypeNames.NormalizeLookup(value.TypeName) ==
+            ValidInstanceTypeNames.NormalizeLookup(nestedType));
+        return hasInferredFallback
+            ? ProviderDecision<ValidInstanceValuePlan>.NotHandled()
             : ProviderDecision<ValidInstanceValuePlan>.Invalid(
                 nested.FailureReason ??
-                $"no nested recipe factory is available for '{nestedType}'");
+                $"no nested recipe factory or inferred value is available for '{nestedType}'");
+    }
+}
+
+internal sealed class InferredValidValueProvider :
+    IPipelineProvider<ValidInstanceValuePlanningRequest, ValidInstanceValuePlan>
+{
+    public string Id => "domainfixture.valid-values.inferred";
+
+    public ProviderDecision<ValidInstanceValuePlan> Evaluate(
+        ValidInstanceValuePlanningRequest request)
+    {
+        var typeName = ValidInstanceTypeNames.NormalizeLookup(request.Parameter.TypeName);
+        var expressions = request.InferredValues
+            .Where(value =>
+                ValidInstanceTypeNames.NormalizeLookup(value.TypeName) == typeName)
+            .Select(value => value.Expression)
+            .Distinct(StringComparer.Ordinal)
+            .ToArray();
+        if (expressions.Length == 0)
+            return ProviderDecision<ValidInstanceValuePlan>.NotHandled();
+        if (expressions.Length > 1)
+        {
+            return ProviderDecision<ValidInstanceValuePlan>.Invalid(
+                $"type '{typeName}' has conflicting inferred value expressions");
+        }
+
+        return ProviderDecision<ValidInstanceValuePlan>.Handled(
+            new ValidInstanceValuePlan(
+                request.Parameter.TypeName,
+                expressions[0],
+                ValidInstanceProvenance.InferredValue));
     }
 }
 
@@ -441,6 +505,12 @@ internal static class ValidInstanceTypeNames
         "bool",
         "System.Boolean",
         "global::System.Boolean");
+
+    public static bool IsDecimal(string typeName) => Matches(
+        typeName,
+        "decimal",
+        "System.Decimal",
+        "global::System.Decimal");
 
     public static bool IsGuid(string typeName) => Matches(
         typeName,

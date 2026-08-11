@@ -12,10 +12,11 @@ internal static class ValidInstanceProvenance
     public const string StringConstraint = "string-constraint";
     public const string Int32Constraint = "int32-constraint";
     public const string PrimitiveDefault = "primitive-default";
-    public const string DeterministicGuid = "deterministic-guid";
+    public const string UniqueGuid = "unique-guid";
     public const string NestedRecipe = "nested-recipe";
     public const string Collection = "collection";
     public const string ConfiguredValue = "configured-value";
+    public const string InferredValue = "inferred-value";
 }
 
 internal sealed class ValidInstanceValuePlan

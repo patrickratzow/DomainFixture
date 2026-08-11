@@ -21,6 +21,8 @@ public sealed class FixtureGenerationApiContractTests
             method.GetGenericArguments().Length == 1);
         typeof(IFixtureConventionOptions).GetMethod(nameof(IFixtureConventionOptions.UseEntityIdentity))
             .Should().NotBeNull();
+        typeof(IFixtureConventionOptions).GetMethod(nameof(IFixtureConventionOptions.AutoSynthesizeRecipes))
+            .Should().NotBeNull();
 
         var rejectionMethods = typeof(IFixtureOperationOptions)
             .GetMethods();
@@ -47,6 +49,8 @@ public sealed class FixtureGenerationApiContractTests
             .Should().NotBeNull();
         builderType.GetMethods().Should().Contain(method =>
             method.Name == nameof(IFixtureRecipeBuilder<ExampleSubject>.State));
+        builderType.GetMethod(nameof(IFixtureRecipeBuilder<ExampleSubject>.FromTransition))
+            .Should().NotBeNull();
         builderType.GetMethods().Should().Contain(method =>
             method.Name == nameof(IFixtureRecipeBuilder<ExampleSubject>.Transition) &&
             method.GetParameters().Length == 3);
@@ -62,7 +66,9 @@ public sealed class FixtureGenerationApiContractTests
             .UseResult<ExampleSubject, ExampleResult>(
                 result => result.Succeeded,
                 result => result.Value);
-        options.Conventions().UseEntityIdentity();
+        options.Conventions()
+            .AutoSynthesizeRecipes()
+            .UseEntityIdentity();
         options.Values()
             .For<ExampleStatus>(() => ExampleStatus.Pending)
             .For<string>(() => "configured");
@@ -70,7 +76,8 @@ public sealed class FixtureGenerationApiContractTests
 
     private static void CompileRecipeSyntax(IFixtureRecipeBuilder<ExampleSubject> recipe)
     {
-        recipe.Transition(
+        recipe.FromTransition("Pending", "Approve")
+            .Transition(
                 "Approve",
                 subject => subject.Approve(),
                 subject => subject.Status,

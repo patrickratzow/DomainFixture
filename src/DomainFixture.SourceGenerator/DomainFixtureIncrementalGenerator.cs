@@ -4,7 +4,6 @@ using DomainFixture.SourceGenerator.Extraction;
 using DomainFixture.SourceGenerator.Generation;
 using DomainFixture.SourceGenerator.Models;
 using DomainFixture.SourceGenerator.Normalization;
-using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using Microsoft.CodeAnalysis;
@@ -107,21 +106,37 @@ public sealed class DomainFixtureIncrementalGenerator : IIncrementalGenerator
 
         context.RegisterSourceOutput(allGenerationInputs, static (productionContext, input) =>
         {
-            var configurations = input.Left.Left.Left.Left;
+            var parsedConfigurations = input.Left.Left.Left.Left;
             var profileResult = input.Left.Left.Left.Right;
             var constraints = input.Left.Left.Right;
             var scenarios = input.Left.Right;
             var manifests = input.Right;
+            var configurations = ApplyRecipeSynthesisDefaults(
+                productionContext,
+                parsedConfigurations,
+                profileResult.Profile);
             var discovered = DomainSpecNormalizer.Normalize(
                 configurations,
                 profileResult.Profile,
                 constraints,
                 scenarios,
                 manifests);
-            var resolvedConfigurations = ResolveValidInstancePlans(
-                productionContext,
+            var baselineResolution = RecipeBaselineResolver.Resolve(
                 discovered,
                 profileResult.Profile);
+            foreach (var failure in baselineResolution.Failures)
+            {
+                productionContext.ReportDiagnostic(
+                    Diagnostics.GeneratorDiagnostics.ValidInstancePlanMissing(
+                        failure.Recipe.Configuration.TransitionSource?.Location ??
+                        failure.Recipe.Configuration.Location,
+                        failure.Recipe.Name,
+                        failure.Type.SubjectTypeName,
+                        string.Join("; ", failure.Reasons)));
+            }
+            var resolvedConfigurations = baselineResolution.Configurations;
+            if (!resolvedConfigurations.IsEmpty)
+                UniqueValueSourceEmitter.Emit(productionContext);
             var normalization = DomainSpecNormalizer.Normalize(
                 resolvedConfigurations,
                 profileResult.Profile,
@@ -167,105 +182,45 @@ public sealed class DomainFixtureIncrementalGenerator : IIncrementalGenerator
         });
     }
 
+    private static ImmutableArray<FixtureGenerationSpec> ApplyRecipeSynthesisDefaults(
+        SourceProductionContext context,
+        ImmutableArray<FixtureGenerationSpec> configurations,
+        GenerationProfileSpec profile)
+    {
+        var prepared = ImmutableArray.CreateBuilder<FixtureGenerationSpec>();
+        foreach (var configuration in configurations)
+        {
+            if (configuration.HasBaselineSource)
+            {
+                prepared.Add(configuration);
+                continue;
+            }
+
+            if (profile.AutoSynthesizeRecipes)
+            {
+                prepared.Add(configuration.WithSynthesizedBaseline());
+                continue;
+            }
+
+            context.ReportDiagnostic(
+                Diagnostics.GeneratorDiagnostics.IncompleteConfiguration(
+                    configuration.Location,
+                    configuration.ConfigurationName));
+        }
+
+        return prepared.ToImmutable();
+    }
+
     private static FixtureGenerationSpec CreateTestBaselineReference(
         FixtureGenerationSpec configuration)
     {
-        if (!configuration.UsesSynthesizedBaseline)
+        if (!configuration.UsesGeneratedBaseline)
             return configuration;
 
         var recipeIdentifier = FixtureFactorySourceEmitter.CreateRecipeIdentifier(
             configuration.RecipeName);
         return configuration.WithBaselineFactoryExpression(
             $"global::{configuration.NamespaceName}.{configuration.ConfigurationName}Factory.{recipeIdentifier}.Create()");
-    }
-
-    private static ImmutableArray<FixtureGenerationSpec> ResolveValidInstancePlans(
-        SourceProductionContext context,
-        DomainSpecNormalizationResult normalization,
-        GenerationProfileSpec profile)
-    {
-        var configurations = ImmutableArray.CreateBuilder<FixtureGenerationSpec>();
-        foreach (var type in normalization.Types)
-        {
-            foreach (var recipe in type.Recipes)
-            {
-                var result = ResolveValidInstancePlan(
-                    normalization,
-                    type,
-                    recipe,
-                    new HashSet<string>(System.StringComparer.Ordinal),
-                    profile);
-                if (!result.IsCovered)
-                {
-                    context.ReportDiagnostic(
-                        Diagnostics.GeneratorDiagnostics.ValidInstancePlanMissing(
-                            recipe.Configuration.Location,
-                            recipe.Name,
-                            type.SubjectTypeName,
-                            string.Join("; ", result.UncoveredReasons)));
-                    continue;
-                }
-
-                configurations.Add(
-                    recipe.Configuration.WithBaselineFactoryExpression(
-                        result.Plan!.Expression));
-            }
-        }
-
-        return configurations.ToImmutable();
-    }
-
-    private static ValidInstancePlanningResult ResolveValidInstancePlan(
-        DomainSpecNormalizationResult normalization,
-        DomainTypeSpec type,
-        DomainRecipeSpec? recipe,
-        HashSet<string> activeTypes,
-        GenerationProfileSpec profile)
-    {
-        if (!activeTypes.Add(type.SubjectTypeName))
-        {
-            return ValidInstancePlanningResult.Uncovered(
-                $"nested construction cycle detected at '{type.SubjectTypeName}'");
-        }
-
-        var result = ValidInstanceProviderPipeline.Resolve(
-            new ValidInstancePlanningRequest(
-                type,
-                recipe,
-                nestedTypeName =>
-                {
-                    var nestedType = normalization.Types.FirstOrDefault(candidate =>
-                        candidate.SubjectTypeName == nestedTypeName);
-                    if (nestedType is null)
-                    {
-                        return NestedValidInstanceResolution.Uncovered(
-                            $"no normalized domain type exists for '{nestedTypeName}'");
-                    }
-
-                    var nestedResult = ResolveValidInstancePlan(
-                        normalization,
-                        nestedType,
-                        nestedType.Recipes.FirstOrDefault(),
-                        new HashSet<string>(activeTypes, System.StringComparer.Ordinal),
-                        profile);
-                    if (!nestedResult.IsCovered)
-                    {
-                        return NestedValidInstanceResolution.Uncovered(
-                            string.Join("; ", nestedResult.UncoveredReasons));
-                    }
-
-                    var nestedRecipe = nestedType.Recipes.FirstOrDefault();
-                    if (nestedRecipe is null)
-                        return NestedValidInstanceResolution.Covered(nestedResult.Plan!.Expression);
-                    var recipeIdentifier = FixtureFactorySourceEmitter.CreateRecipeIdentifier(
-                        nestedRecipe.Name);
-                    var nestedConfiguration = nestedRecipe.Configuration;
-                    return NestedValidInstanceResolution.Covered(
-                        $"global::{nestedConfiguration.NamespaceName}.{nestedConfiguration.ConfigurationName}Factory.{recipeIdentifier}.Create()");
-                },
-                profile.ConfiguredValues));
-        activeTypes.Remove(type.SubjectTypeName);
-        return result;
     }
 
     private static void ReportOperationManifestFailure(

@@ -78,53 +78,20 @@ internal abstract class DomainTransitionScenarioProviderBase
         return builder.ToString();
     }
 
-    protected static string EscapeIdentifier(string identifier)
-    {
-        return SyntaxFacts.GetKeywordKind(identifier) != SyntaxKind.None ||
-               SyntaxFacts.GetContextualKeywordKind(identifier) != SyntaxKind.None
-            ? "@" + identifier
-            : identifier;
-    }
-
     protected static bool TryCreateCommandInvocation(
         DomainScenarioPlanningRequest request,
         DomainTransitionSpec transition,
         out string? invocation,
         out string? failureReason)
     {
-        var arguments = new List<string>();
-        foreach (var argument in transition.Arguments.OrderBy(candidate => candidate.Position))
-        {
-            if (argument.Source == DomainCommandArgumentSource.ExplicitExpression)
-            {
-                arguments.Add(argument.ExpressionText);
-                continue;
-            }
-
-            var parameter = new DomainOperationParameterContract(
-                argument.ParameterName,
-                argument.TypeName,
-                argument.ParameterName);
-            var value = ValidInstanceValueProviderPipeline.Resolve(
-                new ValidInstanceValuePlanningRequest(
-                    parameter,
-                    request.Constraints.Where(constraint =>
-                        constraint.MemberPath == argument.ParameterName).ToArray(),
-                    request.NestedResolver,
-                    request.ConfiguredValues));
-            if (!value.IsCovered)
-            {
-                invocation = null;
-                failureReason = $"command argument '{argument.ParameterName}' is uncovered: {value.UncoveredReason}";
-                return false;
-            }
-
-            arguments.Add(value.Plan!.Expression);
-        }
-
-        invocation = $"subject.{EscapeIdentifier(transition.Operation.MemberName)}({string.Join(", ", arguments)})";
-        failureReason = null;
-        return true;
+        return DomainTransitionInvocationPlanner.TryCreate(
+            transition,
+            request.Constraints,
+            request.NestedResolver,
+            request.ConfiguredValues,
+            request.InferredValues,
+            out invocation,
+            out failureReason);
     }
 }
 
@@ -315,6 +282,7 @@ internal sealed class DomainScenarioPlanningRequest
     public IReadOnlyList<DomainConstraintContract> Constraints { get; }
     public IReadOnlyList<DomainOperationOutcomeContract> Outcomes { get; }
     public IReadOnlyList<ConfiguredValueSpec> ConfiguredValues { get; }
+    public IReadOnlyList<InferredValueSpec> InferredValues { get; }
     public System.Func<string, NestedValidInstanceResolution> NestedResolver { get; }
 
     public DomainScenarioPlanningRequest(
@@ -326,6 +294,7 @@ internal sealed class DomainScenarioPlanningRequest
         IReadOnlyList<DomainConstraintContract>? constraints = null,
         IReadOnlyList<DomainOperationOutcomeContract>? outcomes = null,
         IReadOnlyList<ConfiguredValueSpec>? configuredValues = null,
+        IReadOnlyList<InferredValueSpec>? inferredValues = null,
         System.Func<string, NestedValidInstanceResolution>? nestedResolver = null)
     {
         Contract = contract;
@@ -336,6 +305,7 @@ internal sealed class DomainScenarioPlanningRequest
         Constraints = constraints ?? new DomainConstraintContract[0];
         Outcomes = outcomes ?? new DomainOperationOutcomeContract[0];
         ConfiguredValues = configuredValues ?? new ConfiguredValueSpec[0];
+        InferredValues = inferredValues ?? configuration.InferredValues;
         NestedResolver = nestedResolver ?? (typeName =>
             NestedValidInstanceResolution.Uncovered(
                 $"no nested recipe factory is available for '{typeName}'"));

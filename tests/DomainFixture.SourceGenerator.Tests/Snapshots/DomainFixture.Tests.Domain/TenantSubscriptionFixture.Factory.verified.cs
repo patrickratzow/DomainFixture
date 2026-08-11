@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using BillingCycle = global::DomainFixture.Tests.Domain.Entities.BillingCycle;
+using DomainFixtureUniqueValue = global::DomainFixture.Generated.DomainFixtureUniqueValue;
 using TenantSubscription = global::DomainFixture.Tests.Domain.Entities.TenantSubscription;
 using Username = global::DomainFixture.Tests.Domain.ValueObjects.Username;
 
@@ -14,7 +15,7 @@ namespace DomainFixture.Tests.Generation
         {
             public static TenantSubscription Create()
             {
-                return TenantSubscription.Create(UsernameFixtureFactory.Validation.Create(), new Username[]{UsernameFixtureFactory.Validation.Create()}, new Dictionary<string, Username>{["a"] = UsernameFixtureFactory.Validation.Create()}, BillingCycle.Monthly);
+                return TenantSubscription.Create(UsernameFixtureFactory.Validation.Create(), new Username[]{UsernameFixtureFactory.Validation.Create()}, new Dictionary<string, Username>{[DomainFixtureUniqueValue.NextString(1, 2147483647)] = UsernameFixtureFactory.Validation.Create()}, BillingCycle.Monthly);
             }
 
             public static TenantSubscription Create(Func<TenantSubscription, TenantSubscription> transform)

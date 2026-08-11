@@ -63,6 +63,12 @@ public interface IFixtureMutationOptions
 
 public interface IFixtureConventionOptions
 {
+    /// <summary>
+    /// Synthesizes a valid baseline for every recipe that does not declare an explicit
+    /// Baseline, Synthesize, or FromTransition source.
+    /// </summary>
+    IFixtureConventionOptions AutoSynthesizeRecipes();
+
     IFixtureConventionOptions UseNullability();
 
     IFixtureConventionOptions UsePropertyNames();

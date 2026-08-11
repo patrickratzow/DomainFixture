@@ -7,7 +7,7 @@ internal static class GeneratorDiagnostics
     private static readonly DiagnosticDescriptor InvalidConfiguration = new(
         "DFG001",
         "Fixture-test configuration is incomplete",
-        "Fixture-test configuration '{0}' must declare a fluent chain containing Recipe and either Baseline or Synthesize",
+        "Fixture-test configuration '{0}' must declare a recipe baseline using Baseline, Synthesize, or FromTransition, unless AutoSynthesizeRecipes is enabled",
         "DomainFixture.Generation",
         DiagnosticSeverity.Error,
         isEnabledByDefault: true);

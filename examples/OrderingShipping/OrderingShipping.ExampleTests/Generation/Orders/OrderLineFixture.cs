@@ -7,7 +7,6 @@ public sealed class OrderLineFixture : IFixtureTestConfiguration<OrderLine>
 {
     public void Configure(IFixtureTestBuilder<OrderLine> fixture)
     {
-        fixture.Recipe("Valid")
-            .Synthesize();
+        fixture.Recipe("Valid");
     }
 }

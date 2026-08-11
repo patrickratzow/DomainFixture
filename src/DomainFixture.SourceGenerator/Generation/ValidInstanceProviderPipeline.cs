@@ -13,12 +13,14 @@ internal sealed class ValidInstancePlanningRequest
     public DomainRecipeSpec? Recipe { get; }
     public Func<string, NestedValidInstanceResolution> NestedResolver { get; }
     public IReadOnlyList<ConfiguredValueSpec> ConfiguredValues { get; }
+    public IReadOnlyList<InferredValueSpec> InferredValues { get; }
 
     public ValidInstancePlanningRequest(
         DomainTypeSpec type,
         DomainRecipeSpec? recipe = null,
         Func<string, NestedValidInstanceResolution>? nestedResolver = null,
-        IReadOnlyList<ConfiguredValueSpec>? configuredValues = null)
+        IReadOnlyList<ConfiguredValueSpec>? configuredValues = null,
+        IReadOnlyList<InferredValueSpec>? inferredValues = null)
     {
         Type = type ?? throw new ArgumentNullException(nameof(type));
         Recipe = recipe;
@@ -26,6 +28,13 @@ internal sealed class ValidInstancePlanningRequest
             NestedValidInstanceResolution.Uncovered(
                 $"no nested recipe factory is available for '{typeName}'"));
         ConfiguredValues = configuredValues ?? new ConfiguredValueSpec[0];
+        InferredValues = inferredValues is not null
+            ? inferredValues
+            : recipe is not null
+                ? recipe.Configuration.InferredValues
+                : type.Recipes
+                    .SelectMany(candidate => candidate.Configuration.InferredValues)
+                    .ToArray();
     }
 }
 
@@ -129,7 +138,8 @@ internal sealed class ConstructionSynthesisValidInstanceProvider :
                         parameter,
                         constraints,
                         request.NestedResolver,
-                        request.ConfiguredValues));
+                        request.ConfiguredValues,
+                        request.InferredValues));
                 if (!value.IsCovered)
                 {
                     uncovered.Add(

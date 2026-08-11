@@ -70,7 +70,7 @@ public sealed class ValidInstancePlannerTests
 
         result.IsCovered.Should().BeTrue();
         result.Plan!.Expression.Should().Be(
-            "global::Example.Person.From(\"aa\", 18)");
+            "global::Example.Person.From(global::DomainFixture.Generated.DomainFixtureUniqueValue.NextString(2, 2147483647), 18)");
         result.Plan.ChosenOperation.Should().BeSameAs(operation);
         result.Plan.SourceId.Should().Be("external-person-adapter");
         result.Plan.FactProvenance.Should().Be(DomainFactProvenance.Manifest);
@@ -116,7 +116,8 @@ public sealed class ValidInstancePlannerTests
             Constraint(DomainConstraintKinds.TextNotEmpty));
 
         result.IsCovered.Should().BeTrue();
-        result.Plan!.Expression.Should().Be("\"aaa\"");
+        result.Plan!.Expression.Should().Be(
+            "global::DomainFixture.Generated.DomainFixtureUniqueValue.NextString(3, 5)");
         result.Plan.Provenance.Should().Be(ValidInstanceProvenance.StringConstraint);
     }
 
@@ -149,12 +150,12 @@ public sealed class ValidInstancePlannerTests
     }
 
     [TestCase("bool", "true", ValidInstanceProvenance.PrimitiveDefault)]
-    [TestCase("global::System.Int32?", "0", ValidInstanceProvenance.PrimitiveDefault)]
+    [TestCase("global::System.Int32?", "1", ValidInstanceProvenance.PrimitiveDefault)]
     [TestCase(
         "global::System.Guid",
-        "new global::System.Guid(\"00000000-0000-0000-0000-000000000001\")",
-        ValidInstanceProvenance.DeterministicGuid)]
-    public void PrimitiveProviders_ShouldBeDeterministic(
+        "global::System.Guid.NewGuid()",
+        ValidInstanceProvenance.UniqueGuid)]
+    public void PrimitiveProviders_ShouldProduceSafeValues(
         string typeName,
         string expression,
         string provenance)
@@ -187,6 +188,65 @@ public sealed class ValidInstancePlannerTests
         boolean.Plan.Provenance.Should().Be(ValidInstanceProvenance.ConfiguredValue);
         status.Plan!.Expression.Should().Be("global::Example.RegistrationStatus.Pending");
         status.Plan.Provenance.Should().Be(ValidInstanceProvenance.ConfiguredValue);
+    }
+
+    [Test]
+    public void InferredValue_ShouldCoverCustomTypeWithoutConfiguration()
+    {
+        var inferred = new[]
+        {
+            new InferredValueSpec(
+                "global::Example.OrderId",
+                "global::Example.OrderId.From(global::System.Guid.NewGuid())",
+                "OrderId.From",
+                null)
+        };
+
+        var result = ValidInstanceValueProviderPipeline.Resolve(
+            new ValidInstanceValuePlanningRequest(
+                new DomainOperationParameterContract(
+                    "orderId",
+                    "global::Example.OrderId",
+                    "OrderId"),
+                new DomainConstraintContract[0],
+                inferredValues: inferred));
+
+        result.IsCovered.Should().BeTrue();
+        result.Plan!.Expression.Should().Be(inferred[0].Expression);
+        result.Plan.Provenance.Should().Be(ValidInstanceProvenance.InferredValue);
+    }
+
+    [Test]
+    public void ConfiguredValue_ShouldOverrideInferredValueWithoutConflict()
+    {
+        var configured = new[]
+        {
+            new ConfiguredValueSpec(
+                "global::Example.OrderId",
+                "global::Example.OrderId.Special",
+                null)
+        };
+        var inferred = new[]
+        {
+            new InferredValueSpec(
+                "global::Example.OrderId",
+                "global::Example.OrderId.From(default)",
+                "OrderId.From",
+                null)
+        };
+
+        var result = ValidInstanceValueProviderPipeline.Resolve(
+            new ValidInstanceValuePlanningRequest(
+                new DomainOperationParameterContract(
+                    "orderId",
+                    "global::Example.OrderId",
+                    "OrderId"),
+                new DomainConstraintContract[0],
+                configuredValues: configured,
+                inferredValues: inferred));
+
+        result.Plan!.Expression.Should().Be("global::Example.OrderId.Special");
+        result.Plan.Provenance.Should().Be(ValidInstanceProvenance.ConfiguredValue);
     }
 
     [Test]
@@ -250,10 +310,10 @@ public sealed class ValidInstancePlannerTests
 
     [TestCase(
         "global::System.Collections.Generic.IReadOnlyList<string>",
-        "new string[] { \"a\" }")]
+        "new string[] { global::DomainFixture.Generated.DomainFixtureUniqueValue.NextString(1, 2147483647) }")]
     [TestCase(
         "global::System.Collections.Generic.HashSet<int>",
-        "new global::System.Collections.Generic.HashSet<int> { 0 }")]
+        "new global::System.Collections.Generic.HashSet<int> { 1 }")]
     public void CollectionProvider_ShouldRecursivelyResolvePrimitiveElements(
         string typeName,
         string expectedExpression)
@@ -275,11 +335,11 @@ public sealed class ValidInstancePlannerTests
 
         result.IsCovered.Should().BeTrue();
         result.Plan!.Expression.Should().Be(
-            "new global::System.Collections.Generic.Dictionary<string, global::Example.Address> { [\"a\"] = global::Example.AddressFixtureFactory.Valid.Create() }");
+            "new global::System.Collections.Generic.Dictionary<string, global::Example.Address> { [global::DomainFixture.Generated.DomainFixtureUniqueValue.NextString(1, 2147483647)] = global::Example.AddressFixtureFactory.Valid.Create() }");
     }
 
     [Test]
-    public void Enum_ShouldRemainExplicitlyUncoveredUntilEnumProviderIsAdded()
+    public void UnknownCustomType_ShouldRemainUncoveredWithoutDiscoveredMetadata()
     {
         var result = ResolveValue("global::Example.RegistrationStatus");
 

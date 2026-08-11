@@ -128,11 +128,32 @@ fixture.Recipe("Valid")
     .Synthesize();
 ```
 
+Assemblies that want synthesis to be the default can enable it once in their generation profile:
+
+```csharp
+options.Conventions()
+    .AutoSynthesizeRecipes();
+```
+
+With that convention, a source-less `fixture.Recipe("Valid");` is equivalent to explicitly calling
+`.Synthesize()`. `Baseline(...)` and `FromTransition(...)` remain explicit overrides, and conflicting
+explicit sources are still rejected. Without the convention, source-less recipes continue to emit
+`DFG001`.
+
 The valid-instance pipeline prefers an explicit baseline, then tries discovered constructors and
 `From`/`Create`/`Of` factories in stable order. Arguments come from intersected string and `Int32`
-constraints, deterministic primitive and `Guid` providers, nested recipes, and common arrays/lists.
+constraints, deterministic bounded primitives, fresh `Guid` providers, assembly-wide unique strings,
+nested recipes, inferred value-object
+factories, and common arrays/lists.
 An uncovered or cyclic parameter emits `DFG042`; the generator never silently substitutes an unsafe
 guess.
+
+Referenced value objects are inspected recursively at compile time. Inference prefers accessible
+`From`/`Create`/`Of` factories, then a single unambiguous static method returning the value type, then
+an accessible constructor. Its arguments use the same pipeline, so shapes such as
+`OrderId.From(Guid)`, `Sku.From(string)`, and `Money.Usd(decimal)` require no profile entries.
+Unconstrained integral and decimal baselines use positive `1`; explicit constraints still determine
+the actual in-range value. Nested fixture recipes take precedence over conventional value inference.
 
 Nested recipes compose through their generated typed factories. Element resolution is recursive, so
 arrays, lists, sets, `Collection<T>`, and dictionary interfaces can contain primitives, configured
@@ -140,8 +161,9 @@ values, or other fixture-backed domain types. Collections contain one determinis
 default. Recursive type graphs are traced during planning and report their construction cycle rather
 than emitting mutually recursive factories.
 
-The assembly profile is the central escape hatch for types that should not be guessed, especially
-enums and domain-specific primitives:
+The assembly profile is the central escape hatch when a convention cannot know the intended business
+choice, such as an enum whose first member is not a valid baseline or a value object with several
+equally meaningful factories:
 
 ```csharp
 options.Values()
@@ -152,8 +174,9 @@ options.Values()
 Configured values are compile-time expressions, not delegates executed by the generator. Literals,
 static fields/properties, constructors, and static factory calls are supported. Duplicate values
 produce `DFG045`; runtime-dependent expressions produce `DFG044`. The configured-value provider runs
-before built-in conventions and is shared by synthesized factories and `FixtureValue.Auto<T>()`
-command arguments. Configured values also appear in the generated normalized-spec report.
+before every built-in or inferred convention, so an explicit value never conflicts with an inferred
+fallback. It is shared by synthesized factories and `FixtureValue.Auto<T>()` command arguments.
+Configured values also appear in the generated normalized-spec report.
 
 ## Normalized spec and coverage
 
@@ -193,6 +216,23 @@ fixture.Recipe("Valid")
         x => x.CanReserve(FixtureValue.Auto<int>()),
         result => result);
 ```
+
+Valid state recipes can be derived from an earlier recipe's successful transition instead of
+repeating its construction values and mutation sequence:
+
+```csharp
+fixture.Recipe("Dispatched")
+    .FromTransition("Pending", "Dispatch");
+
+fixture.Recipe("Delivered")
+    .FromTransition("Dispatched", "Deliver");
+```
+
+The generator creates the source recipe, resolves automatic transition arguments through the same
+value pipeline, applies the synchronous command, and returns a fresh aggregate in the requested
+state. Immutable subject-returning commands are reassigned automatically. Rejection and arbitrary
+result transitions cannot serve as valid-state edges. Missing recipes/transitions, uncovered command
+arguments, and cyclic state graphs produce `DFG042` instead of generating a partial factory.
 
 The `.Domain` acceptance suite snapshots the generated `Subscription` factory and its construction,
 result, immutable-state, identity, and nested-state tests.

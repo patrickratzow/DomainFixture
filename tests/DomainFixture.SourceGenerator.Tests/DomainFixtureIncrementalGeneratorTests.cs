@@ -21,7 +21,7 @@ public class DomainFixtureIncrementalGeneratorTests
         var result = RunGenerator(ValidSource, out var outputCompilation);
 
         result.Diagnostics.Should().BeEmpty();
-        result.GeneratedTrees.Should().HaveCount(5);
+        result.GeneratedTrees.Should().HaveCount(6);
         result.GeneratedTrees.Should().Contain(tree => tree.FilePath.EndsWith(
             "DomainFixture.DomainSpecSnapshot.g.cs"));
         result.GeneratedTrees.Should().Contain(tree => tree.FilePath.EndsWith(
@@ -70,7 +70,7 @@ public class DomainFixtureIncrementalGeneratorTests
         var result = RunGenerator(source, out var outputCompilation);
 
         result.Diagnostics.Should().BeEmpty();
-        result.GeneratedTrees.Should().HaveCount(6);
+        result.GeneratedTrees.Should().HaveCount(7);
         result.GeneratedTrees.Select(tree => tree.FilePath).Should().Contain(path =>
             path.EndsWith("UserFixtureConfiguration.Registration.g.cs"));
         result.GeneratedTrees.Select(tree => tree.FilePath).Should().Contain(path =>
@@ -410,10 +410,37 @@ public class DomainFixtureIncrementalGeneratorTests
         result.Diagnostics.Should().BeEmpty();
         var factory = result.GeneratedTrees.Single(tree => tree.FilePath.EndsWith(
             "AccountFixture.Factory.g.cs")).ToString();
-        factory.Should().Contain("Account.From(\"a\", 0)");
+        factory.Should().Contain("Account.From(DomainFixtureUniqueValue.NextString(1, 2147483647), 1)");
         result.GeneratedTrees.Single(tree => tree.FilePath.EndsWith(
                 "DomainFixture.DomainCoverageReport.g.cs")).ToString().Should()
             .Contain("[Both] Operation");
+        outputCompilation.GetDiagnostics()
+            .Where(diagnostic => diagnostic.Severity == DiagnosticSeverity.Error)
+            .Should().BeEmpty();
+    }
+
+    [Test]
+    public void Generator_ShouldSynthesizeSourceLessRecipe_WhenProfileEnablesConvention()
+    {
+        var source = SynthesizedRecipeSource.Replace(".Synthesize();", ";");
+        source = source.Insert(
+            source.IndexOf("    public sealed class Account", StringComparison.Ordinal),
+            @"    public sealed class Profile : IFixtureGenerationProfile
+    {
+        public void Configure(IFixtureGenerationOptions options)
+        {
+            options.Conventions().AutoSynthesizeRecipes();
+        }
+    }
+
+");
+
+        var result = RunGenerator(source, out var outputCompilation);
+
+        result.Diagnostics.Should().BeEmpty();
+        result.GeneratedTrees.Single(tree => tree.FilePath.EndsWith(
+                "AccountFixture.Factory.g.cs")).ToString().Should()
+            .Contain("Account.From(DomainFixtureUniqueValue.NextString(1, 2147483647), 1)");
         outputCompilation.GetDiagnostics()
             .Where(diagnostic => diagnostic.Severity == DiagnosticSeverity.Error)
             .Should().BeEmpty();
@@ -455,9 +482,9 @@ public class DomainFixtureIncrementalGeneratorTests
             .Contain("AddressFixtureFactory.Valid.Create()")
             .And.Contain("Currency.Eur")
             .And.Contain("new string[]")
-            .And.Contain("\"a\"")
+            .And.Contain("DomainFixtureUniqueValue.NextString(1, 2147483647)")
             .And.Contain("new Dictionary<string, Address>")
-            .And.Contain("[\"a\"] = AddressFixtureFactory.Valid.Create()");
+            .And.Contain("[DomainFixtureUniqueValue.NextString(1, 2147483647)] = AddressFixtureFactory.Valid.Create()");
 
         var suite = result.GeneratedTrees.Single(tree => tree.FilePath.EndsWith(
             "OrderFixture.Valid.g.cs")).ToString();
