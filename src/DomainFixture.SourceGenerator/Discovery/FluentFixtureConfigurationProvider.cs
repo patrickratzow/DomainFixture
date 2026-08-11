@@ -201,11 +201,14 @@ internal static class FluentFixtureConfigurationProvider
             CreateFactoryExpression(baselineFactory),
             validatorFactory is null ? null : CreateFactoryExpression(validatorFactory),
             validationRulesType?.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat),
-            DiscoverProperties(subjectType),
+            DiscoverProperties(subjectType, semanticModel.Compilation.Assembly),
+            CanUseDerivedReconstruction(subjectType, semanticModel.Compilation.Assembly),
             outerInvocation.GetLocation());
     }
 
-    private static ImmutableArray<SubjectPropertySpec> DiscoverProperties(ITypeSymbol subjectType)
+    private static ImmutableArray<SubjectPropertySpec> DiscoverProperties(
+        ITypeSymbol subjectType,
+        IAssemblySymbol currentAssembly)
     {
         var properties = ImmutableArray.CreateBuilder<SubjectPropertySpec>();
         var seenNames = new HashSet<string>();
@@ -219,20 +222,85 @@ internal static class FluentFixtureConfigurationProvider
 
                 properties.Add(new SubjectPropertySpec(
                     property.Name,
+                    property.Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat),
                     property.Type.SpecialType == SpecialType.System_String,
                     property.NullableAnnotation == NullableAnnotation.NotAnnotated,
-                    HasAccessibleSetter(property)));
+                    IsAccessibleFromGeneratedCode(property.SetMethod, currentAssembly),
+                    property.SetMethod is not null,
+                    IsSetterAccessibleFromDerivedType(property.SetMethod, currentAssembly),
+                    IsAccessibleFromGeneratedCode(property.GetMethod, currentAssembly)));
             }
         }
 
         return properties.ToImmutable();
     }
 
-    private static bool HasAccessibleSetter(IPropertySymbol property)
+    private static bool CanUseDerivedReconstruction(
+        ITypeSymbol subjectType,
+        IAssemblySymbol currentAssembly)
     {
-        return property.SetMethod?.DeclaredAccessibility is Accessibility.Public or
-            Accessibility.Internal or
-            Accessibility.ProtectedOrInternal;
+        if (subjectType is not INamedTypeSymbol namedType ||
+            namedType.TypeKind != TypeKind.Class ||
+            namedType.IsSealed ||
+            !namedType.InstanceConstructors.Any(constructor =>
+                constructor.Parameters.Length == 0 &&
+                IsConstructorAccessibleFromDerivedType(constructor, currentAssembly)))
+        {
+            return false;
+        }
+
+        var properties = DiscoverProperties(subjectType, currentAssembly);
+        return properties
+            .Where(property => property.HasSetter)
+            .All(property =>
+                property.CanSetFromDerivedType &&
+                property.CanReadFromGeneratedCode);
+    }
+
+    private static bool IsAccessibleFromGeneratedCode(
+        IMethodSymbol? method,
+        IAssemblySymbol currentAssembly)
+    {
+        if (method is null)
+            return false;
+
+        var sameAssembly = SymbolEqualityComparer.Default.Equals(
+            method.ContainingAssembly,
+            currentAssembly);
+        return method.DeclaredAccessibility == Accessibility.Public ||
+               sameAssembly && method.DeclaredAccessibility is Accessibility.Internal or
+                   Accessibility.ProtectedOrInternal;
+    }
+
+    private static bool IsSetterAccessibleFromDerivedType(
+        IMethodSymbol? method,
+        IAssemblySymbol currentAssembly)
+    {
+        if (method is null)
+            return false;
+
+        var sameAssembly = SymbolEqualityComparer.Default.Equals(
+            method.ContainingAssembly,
+            currentAssembly);
+        return method.DeclaredAccessibility is Accessibility.Public or
+                   Accessibility.Protected or
+                   Accessibility.ProtectedOrInternal ||
+               sameAssembly && method.DeclaredAccessibility is Accessibility.Internal or
+                   Accessibility.ProtectedAndInternal;
+    }
+
+    private static bool IsConstructorAccessibleFromDerivedType(
+        IMethodSymbol constructor,
+        IAssemblySymbol currentAssembly)
+    {
+        var sameAssembly = SymbolEqualityComparer.Default.Equals(
+            constructor.ContainingAssembly,
+            currentAssembly);
+        return constructor.DeclaredAccessibility is Accessibility.Public or
+                   Accessibility.Protected or
+                   Accessibility.ProtectedOrInternal ||
+               sameAssembly && constructor.DeclaredAccessibility is Accessibility.Internal or
+                   Accessibility.ProtectedAndInternal;
     }
 
     private static IEnumerable<InvocationExpressionSyntax> EnumerateChain(

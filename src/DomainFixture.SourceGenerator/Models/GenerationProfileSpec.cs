@@ -7,6 +7,7 @@ internal sealed class GenerationProfileSpec
     public static GenerationProfileSpec Default { get; } = new(
         useNullability: false,
         usePropertyNames: false,
+        useImmutableObjects: false,
         useFluentValidation: false,
         FixtureActivationKind.Factories,
         serviceProviderFactoryType: null,
@@ -14,6 +15,7 @@ internal sealed class GenerationProfileSpec
 
     public bool UseNullability { get; }
     public bool UsePropertyNames { get; }
+    public bool UseImmutableObjects { get; }
     public bool UseFluentValidation { get; }
     public FixtureActivationKind ActivationKind { get; }
     public string? ServiceProviderFactoryType { get; }
@@ -22,6 +24,7 @@ internal sealed class GenerationProfileSpec
     public GenerationProfileSpec(
         bool useNullability,
         bool usePropertyNames,
+        bool useImmutableObjects,
         bool useFluentValidation,
         FixtureActivationKind activationKind,
         string? serviceProviderFactoryType,
@@ -29,6 +32,7 @@ internal sealed class GenerationProfileSpec
     {
         UseNullability = useNullability;
         UsePropertyNames = usePropertyNames;
+        UseImmutableObjects = useImmutableObjects;
         UseFluentValidation = useFluentValidation;
         ActivationKind = activationKind;
         ServiceProviderFactoryType = serviceProviderFactoryType;

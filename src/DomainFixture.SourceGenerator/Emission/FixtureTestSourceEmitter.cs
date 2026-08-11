@@ -89,6 +89,40 @@ internal static class FixtureTestSourceEmitter
                 continue;
             }
 
+            string? generatedReconstruction = null;
+            var automaticProperties = matchingRules
+                .Where(rule =>
+                    !rule.PropertyCanBeAssigned &&
+                    !propertyMutations.ContainsKey(rule.PropertyName))
+                .Select(rule => configuration.SubjectProperties.FirstOrDefault(property =>
+                    property.Name == rule.PropertyName))
+                .Where(property => property is not null)
+                .Select(property => property!)
+                .GroupBy(property => property.Name)
+                .Select(group => group.First())
+                .ToArray();
+            if (automaticProperties.Length > 0 &&
+                profileResult.Profile.UseImmutableObjects &&
+                configuration.CanUseDerivedReconstruction &&
+                automaticProperties.All(property => property.CanSetFromDerivedType))
+            {
+                var reconstructionClassName =
+                    $"{configuration.SubjectTypeShortName}{configuration.RecipeName}ImmutableReconstruction";
+                generatedReconstruction = ImmutableObjectReconstructionEmitter.Emit(
+                    configuration,
+                    reconstructionClassName,
+                    automaticProperties);
+                foreach (var property in automaticProperties)
+                {
+                    propertyMutations.Add(
+                        property.Name,
+                        new PropertyMutationSpec(
+                            configuration.SubjectTypeName,
+                            property.Name,
+                            $"global::{configuration.NamespaceName}.{reconstructionClassName}.With{property.Name}"));
+                }
+            }
+
             var inaccessibleRule = matchingRules.FirstOrDefault(rule =>
                 !rule.PropertyCanBeAssigned &&
                 !propertyMutations.ContainsKey(rule.PropertyName));
@@ -138,7 +172,9 @@ internal static class FixtureTestSourceEmitter
                 SyntaxFactory.ParseExpression(validatorFactoryExpression),
                 cases);
             var suite = new ValidationTestSuiteBuilder().Build(descriptor);
-            var source = new NUnitTestEmitter().EmitSource(suite) + generatedAdapter;
+            var source = new NUnitTestEmitter().EmitSource(suite) +
+                         generatedAdapter +
+                         generatedReconstruction;
             var hintName = $"{configuration.ConfigurationName}.{configuration.RecipeName}.g.cs";
 
             context.AddSource(hintName, SourceText.From(source, Encoding.UTF8));

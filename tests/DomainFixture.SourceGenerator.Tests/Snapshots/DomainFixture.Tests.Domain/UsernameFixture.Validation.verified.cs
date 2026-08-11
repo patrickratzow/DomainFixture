@@ -20,7 +20,7 @@ namespace DomainFixture.Tests.Generation
         public void Validation_Value_LengthAtMaximum_IsValid()
         {
             global::DomainFixture.Tests.Domain.ValueObjects.Username subject = global::DomainFixture.Tests.Generation.UsernameFixture.Baseline();
-            subject = global::DomainFixture.Tests.Generation.UsernameTestFactory.WithValue(subject, new string ('a', 128));
+            subject = global::DomainFixture.Tests.Generation.UsernameValidationImmutableReconstruction.WithValue(subject, new string ('a', 128));
             var validator = new global::DomainFixture.Tests.Generation.UsernameValidationFluentValidationAdapter();
             var report = validator.Validate(subject);
             Assert.That(report.IsValid, Is.True);
@@ -30,7 +30,7 @@ namespace DomainFixture.Tests.Generation
         public void Validation_Value_LengthAboveMaximum_IsInvalid()
         {
             global::DomainFixture.Tests.Domain.ValueObjects.Username subject = global::DomainFixture.Tests.Generation.UsernameFixture.Baseline();
-            subject = global::DomainFixture.Tests.Generation.UsernameTestFactory.WithValue(subject, new string ('a', 129));
+            subject = global::DomainFixture.Tests.Generation.UsernameValidationImmutableReconstruction.WithValue(subject, new string ('a', 129));
             var validator = new global::DomainFixture.Tests.Generation.UsernameValidationFluentValidationAdapter();
             var report = validator.Validate(subject);
             Assert.That(report.ContainsFailure("Value"), Is.True);
@@ -40,7 +40,7 @@ namespace DomainFixture.Tests.Generation
         public void Validation_Value_NotEmpty_Empty_IsInvalid()
         {
             global::DomainFixture.Tests.Domain.ValueObjects.Username subject = global::DomainFixture.Tests.Generation.UsernameFixture.Baseline();
-            subject = global::DomainFixture.Tests.Generation.UsernameTestFactory.WithValue(subject, "");
+            subject = global::DomainFixture.Tests.Generation.UsernameValidationImmutableReconstruction.WithValue(subject, "");
             var validator = new global::DomainFixture.Tests.Generation.UsernameValidationFluentValidationAdapter();
             var report = validator.Validate(subject);
             Assert.That(report.ContainsFailure("Value"), Is.True);
@@ -50,7 +50,7 @@ namespace DomainFixture.Tests.Generation
         public void Validation_Value_NotNull_Null_IsInvalid()
         {
             global::DomainFixture.Tests.Domain.ValueObjects.Username subject = global::DomainFixture.Tests.Generation.UsernameFixture.Baseline();
-            subject = global::DomainFixture.Tests.Generation.UsernameTestFactory.WithValue(subject, null);
+            subject = global::DomainFixture.Tests.Generation.UsernameValidationImmutableReconstruction.WithValue(subject, null);
             var validator = new global::DomainFixture.Tests.Generation.UsernameValidationFluentValidationAdapter();
             var report = validator.Validate(subject);
             Assert.That(report.ContainsFailure("Value"), Is.True);
@@ -75,6 +75,24 @@ namespace DomainFixture.Tests.Generation
             }
 
             return new global::DomainFixture.Validation.ValidationReport(failures);
+        }
+    }
+}
+
+namespace DomainFixture.Tests.Generation
+{
+    internal sealed class UsernameValidationImmutableReconstruction : global::DomainFixture.Tests.Domain.ValueObjects.Username
+    {
+        private UsernameValidationImmutableReconstruction()
+        {
+        }
+
+        internal static global::DomainFixture.Tests.Domain.ValueObjects.Username WithValue(global::DomainFixture.Tests.Domain.ValueObjects.Username source, string value)
+        {
+            return new UsernameValidationImmutableReconstruction
+            {
+                Value = value
+            };
         }
     }
 }

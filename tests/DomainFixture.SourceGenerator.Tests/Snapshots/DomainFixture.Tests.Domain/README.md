@@ -7,6 +7,8 @@ The `.verified.cs` files are the exact NUnit sources generated from:
 - `RegistrationRequestFixture.cs` in the test project.
 - `DomainFixture.Tests.Domain.ValueObjects.UsernameValidator` in the real `.Domain` assembly;
 - `UsernameFixture.cs` and its centrally configured reconstruction strategy.
+- `QualifiedNameFixture.cs`, which proves that reconstruction preserves the untouched property of
+  a two-property immutable value object.
 
 The test-project generation profile enables FluentValidation once for the assembly. Fixtures only
 provide their baseline; the generator matches the validator by subject type and emits the adapter

@@ -56,6 +56,7 @@ internal static class GenerationProfileProvider
             configureDeclaration.SyntaxTree);
         var useNullability = false;
         var usePropertyNames = false;
+        var useImmutableObjects = false;
         var useFluentValidation = false;
         var useFactories = false;
         string? serviceProviderFactoryType = null;
@@ -77,6 +78,9 @@ internal static class GenerationProfileProvider
                     break;
                 case "UsePropertyNames":
                     usePropertyNames = true;
+                    break;
+                case "UseImmutableObjects":
+                    useImmutableObjects = true;
                     break;
                 case "UseFluentValidation":
                     useFluentValidation = true;
@@ -135,6 +139,7 @@ internal static class GenerationProfileProvider
             new GenerationProfileSpec(
                 useNullability,
                 usePropertyNames,
+                useImmutableObjects,
                 useFluentValidation,
                 serviceProviderFactoryType is null
                     ? FixtureActivationKind.Factories

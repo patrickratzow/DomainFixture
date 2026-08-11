@@ -40,6 +40,8 @@ public interface IFixtureConventionOptions
     IFixtureConventionOptions UseNullability();
 
     IFixtureConventionOptions UsePropertyNames();
+
+    IFixtureConventionOptions UseImmutableObjects();
 }
 
 /// <summary>

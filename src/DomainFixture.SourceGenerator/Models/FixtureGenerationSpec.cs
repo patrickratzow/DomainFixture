@@ -14,6 +14,7 @@ internal sealed class FixtureGenerationSpec
     public string? ValidatorFactoryExpression { get; }
     public string? ValidationRulesTypeKey { get; }
     public ImmutableArray<SubjectPropertySpec> SubjectProperties { get; }
+    public bool CanUseDerivedReconstruction { get; }
     public Location? Location { get; }
 
     public FixtureGenerationSpec(
@@ -26,6 +27,7 @@ internal sealed class FixtureGenerationSpec
         string? validatorFactoryExpression,
         string? validationRulesTypeKey,
         ImmutableArray<SubjectPropertySpec> subjectProperties,
+        bool canUseDerivedReconstruction,
         Location? location)
     {
         ConfigurationName = configurationName;
@@ -37,6 +39,7 @@ internal sealed class FixtureGenerationSpec
         ValidatorFactoryExpression = validatorFactoryExpression;
         ValidationRulesTypeKey = validationRulesTypeKey;
         SubjectProperties = subjectProperties;
+        CanUseDerivedReconstruction = canUseDerivedReconstruction;
         Location = location;
     }
 }
