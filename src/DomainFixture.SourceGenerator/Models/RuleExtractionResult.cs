@@ -2,17 +2,19 @@ using Microsoft.CodeAnalysis;
 
 namespace DomainFixture.SourceGenerator.Models;
 
-internal sealed class RuleExtractionResult
+internal sealed class ConstraintExtractionResult
 {
-    public ValidationRuleSpec? Rule { get; }
+    public DiscoveredDomainConstraint? Constraint { get; }
     public Diagnostic? Diagnostic { get; }
 
-    private RuleExtractionResult(ValidationRuleSpec? rule, Diagnostic? diagnostic)
+    private ConstraintExtractionResult(DiscoveredDomainConstraint? constraint, Diagnostic? diagnostic)
     {
-        Rule = rule;
+        Constraint = constraint;
         Diagnostic = diagnostic;
     }
 
-    public static RuleExtractionResult Success(ValidationRuleSpec rule) => new(rule, null);
-    public static RuleExtractionResult Failure(Diagnostic diagnostic) => new(null, diagnostic);
+    public static ConstraintExtractionResult Success(DiscoveredDomainConstraint constraint) =>
+        new(constraint, null);
+
+    public static ConstraintExtractionResult Failure(Diagnostic diagnostic) => new(null, diagnostic);
 }

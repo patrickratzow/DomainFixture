@@ -12,6 +12,7 @@
     </ItemGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\DomainFixture.Contracts\DomainFixture.Contracts.csproj" PrivateAssets="all" />
       <ProjectReference Include="..\DomainFixture.TestGenerator\DomainFixture.TestGenerator.csproj" PrivateAssets="all" />
     </ItemGroup>
 

@@ -6,10 +6,17 @@ namespace DomainFixture.Generation.Metadata;
 [EditorBrowsable(EditorBrowsableState.Never)]
 public enum ValidationRuleManifestKind
 {
-    StringLength,
-    NotEmpty,
-    NotNull,
-    StringMaximumLength
+    TextLength = 0,
+    StringLength = TextLength,
+    NotEmpty = 1,
+    NotNull = 2,
+    TextMaximumLength = 3,
+    StringMaximumLength = TextMaximumLength,
+    TextMinimumLength = 4,
+    Int32InclusiveRange = 5,
+    Int32ExclusiveRange = 6,
+    Int32GreaterThan = 7,
+    Int32LessThan = 8
 }
 
 [AttributeUsage(AttributeTargets.Assembly, AllowMultiple = true)]

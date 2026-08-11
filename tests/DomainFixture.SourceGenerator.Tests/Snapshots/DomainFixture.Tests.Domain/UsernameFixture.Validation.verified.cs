@@ -1,5 +1,14 @@
 using System.CodeDom.Compiler;
 using NUnit.Framework;
+using System.Collections.Generic;
+using IFixtureValidator = global::DomainFixture.Validation.IFixtureValidator<global::DomainFixture.Tests.Domain.ValueObjects.Username>;
+using Username = global::DomainFixture.Tests.Domain.ValueObjects.Username;
+using UsernameValidator = global::DomainFixture.Tests.Domain.ValueObjects.UsernameValidator;
+using ValidationContext = global::FluentValidation.ValidationContext<global::DomainFixture.Tests.Domain.ValueObjects.Username>;
+using ValidationException = global::FluentValidation.ValidationException;
+using ValidationFailure = global::DomainFixture.Validation.ValidationFailure;
+using ValidationReport = global::DomainFixture.Validation.ValidationReport;
+using ValueOf = global::DomainFixture.Tests.Domain.ValueObjects.ValueOf<string, global::DomainFixture.Tests.Domain.ValueObjects.Username>;
 
 namespace DomainFixture.Tests.Generation
 {
@@ -10,8 +19,8 @@ namespace DomainFixture.Tests.Generation
         [Test]
         public void Validation_Baseline_IsValid()
         {
-            global::DomainFixture.Tests.Domain.ValueObjects.Username subject = global::DomainFixture.Tests.Generation.UsernameFixture.Baseline();
-            var validator = new global::DomainFixture.Tests.Generation.UsernameValidationFluentValidationAdapter();
+            Username subject = UsernameFixture.Baseline();
+            var validator = new UsernameValidationFluentValidationAdapter();
             var report = validator.Validate(subject);
             Assert.That(report.IsValid, Is.True);
         }
@@ -19,9 +28,9 @@ namespace DomainFixture.Tests.Generation
         [Test]
         public void Validation_Value_LengthAtMaximum_IsValid()
         {
-            global::DomainFixture.Tests.Domain.ValueObjects.Username subject = global::DomainFixture.Tests.Generation.UsernameFixture.Baseline();
-            subject = global::DomainFixture.Tests.Generation.UsernameValidationImmutableReconstruction.WithValue(subject, new string ('a', 128));
-            var validator = new global::DomainFixture.Tests.Generation.UsernameValidationFluentValidationAdapter();
+            Username subject = UsernameFixture.Baseline();
+            subject = UsernameValidationImmutableReconstruction.WithValue(subject, new string ('a', 128));
+            var validator = new UsernameValidationFluentValidationAdapter();
             var report = validator.Validate(subject);
             Assert.That(report.IsValid, Is.True);
         }
@@ -29,9 +38,9 @@ namespace DomainFixture.Tests.Generation
         [Test]
         public void Validation_Value_LengthAboveMaximum_IsInvalid()
         {
-            global::DomainFixture.Tests.Domain.ValueObjects.Username subject = global::DomainFixture.Tests.Generation.UsernameFixture.Baseline();
-            subject = global::DomainFixture.Tests.Generation.UsernameValidationImmutableReconstruction.WithValue(subject, new string ('a', 129));
-            var validator = new global::DomainFixture.Tests.Generation.UsernameValidationFluentValidationAdapter();
+            Username subject = UsernameFixture.Baseline();
+            subject = UsernameValidationImmutableReconstruction.WithValue(subject, new string ('a', 129));
+            var validator = new UsernameValidationFluentValidationAdapter();
             var report = validator.Validate(subject);
             Assert.That(report.ContainsFailure("Value"), Is.True);
         }
@@ -39,9 +48,9 @@ namespace DomainFixture.Tests.Generation
         [Test]
         public void Validation_Value_NotEmpty_Empty_IsInvalid()
         {
-            global::DomainFixture.Tests.Domain.ValueObjects.Username subject = global::DomainFixture.Tests.Generation.UsernameFixture.Baseline();
-            subject = global::DomainFixture.Tests.Generation.UsernameValidationImmutableReconstruction.WithValue(subject, "");
-            var validator = new global::DomainFixture.Tests.Generation.UsernameValidationFluentValidationAdapter();
+            Username subject = UsernameFixture.Baseline();
+            subject = UsernameValidationImmutableReconstruction.WithValue(subject, "");
+            var validator = new UsernameValidationFluentValidationAdapter();
             var report = validator.Validate(subject);
             Assert.That(report.ContainsFailure("Value"), Is.True);
         }
@@ -49,50 +58,107 @@ namespace DomainFixture.Tests.Generation
         [Test]
         public void Validation_Value_NotNull_Null_IsInvalid()
         {
-            global::DomainFixture.Tests.Domain.ValueObjects.Username subject = global::DomainFixture.Tests.Generation.UsernameFixture.Baseline();
-            subject = global::DomainFixture.Tests.Generation.UsernameValidationImmutableReconstruction.WithValue(subject, null);
-            var validator = new global::DomainFixture.Tests.Generation.UsernameValidationFluentValidationAdapter();
+            Username subject = UsernameFixture.Baseline();
+            subject = UsernameValidationImmutableReconstruction.WithValue(subject, null);
+            var validator = new UsernameValidationFluentValidationAdapter();
             var report = validator.Validate(subject);
             Assert.That(report.ContainsFailure("Value"), Is.True);
         }
-    }
-}
 
-namespace DomainFixture.Tests.Generation
-{
-    internal sealed class UsernameValidationFluentValidationAdapter : global::DomainFixture.Validation.IFixtureValidator<global::DomainFixture.Tests.Domain.ValueObjects.Username>
-    {
-        private readonly global::DomainFixture.Tests.Domain.ValueObjects.UsernameValidator _validator = new global::DomainFixture.Tests.Domain.ValueObjects.UsernameValidator();
-
-        public global::DomainFixture.Validation.ValidationReport Validate(global::DomainFixture.Tests.Domain.ValueObjects.Username subject)
+        [Test]
+        public void Construction_From_Value_LengthAboveMaximum_IsInvalid_IsRejected()
         {
-            var context = new global::FluentValidation.ValidationContext<global::DomainFixture.Tests.Domain.ValueObjects.Username>(subject);
-            var result = _validator.Validate(context);
-            var failures = new global::System.Collections.Generic.List<global::DomainFixture.Validation.ValidationFailure>();
-            foreach (var error in result.Errors)
-            {
-                failures.Add(new global::DomainFixture.Validation.ValidationFailure(error.PropertyName, error.ErrorCode, error.ErrorMessage));
-            }
+            Username baseline = UsernameFixture.Baseline();
+            Assert.Throws<ValidationException>(() => ValueOf.From(new string ('a', 129)));
+        }
 
-            return new global::DomainFixture.Validation.ValidationReport(failures);
+        [Test]
+        public void Construction_From_Value_NotEmpty_Empty_IsInvalid_IsRejected()
+        {
+            Username baseline = UsernameFixture.Baseline();
+            Assert.Throws<ValidationException>(() => ValueOf.From(""));
+        }
+
+        [Test]
+        public void Construction_From_Value_NotNull_Null_IsInvalid_IsRejected()
+        {
+            Username baseline = UsernameFixture.Baseline();
+            Assert.Throws<ValidationException>(() => ValueOf.From(null));
+        }
+
+        [Test]
+        public void Validation_Equality_IsReflexive()
+        {
+            Username subject = UsernameFixture.Baseline();
+            Assert.That(subject.Equals(subject), Is.True);
+        }
+
+        [Test]
+        public void Validation_Equality_EquivalentValuesAreSymmetric()
+        {
+            Username subject = UsernameFixture.Baseline();
+            Username equivalent = ValueOf.From(subject.Value);
+            Assert.That(subject.Equals(equivalent), Is.True);
+            Assert.That(equivalent.Equals(subject), Is.True);
+        }
+
+        [Test]
+        public void Validation_Equality_EquivalentValuesHaveSameHashCode()
+        {
+            Username subject = UsernameFixture.Baseline();
+            Username equivalent = ValueOf.From(subject.Value);
+            Assert.That(subject.GetHashCode(), Is.EqualTo(equivalent.GetHashCode()));
+        }
+
+        [Test]
+        public void Validation_Construction_From_Value_BaselineSucceeds()
+        {
+            Username baseline = UsernameFixture.Baseline();
+            Username constructed = ValueOf.From(baseline.Value);
+            Assert.That(constructed, Is.Not.Null);
+        }
+
+        [Test]
+        public void Validation_Construction_From_Value_ArgumentsRoundTrip()
+        {
+            Username baseline = UsernameFixture.Baseline();
+            Username constructed = ValueOf.From(baseline.Value);
+            Assert.That(constructed.Value, Is.EqualTo(baseline.Value));
         }
     }
 }
 
 namespace DomainFixture.Tests.Generation
 {
-    internal sealed class UsernameValidationImmutableReconstruction : global::DomainFixture.Tests.Domain.ValueObjects.Username
+    internal sealed class UsernameValidationFluentValidationAdapter : IFixtureValidator
+    {
+        private readonly UsernameValidator _validator = new UsernameValidator();
+        public ValidationReport Validate(Username subject)
+        {
+            var context = new ValidationContext(subject);
+            var result = _validator.Validate(context);
+            var failures = new List<ValidationFailure>();
+            foreach (var error in result.Errors)
+            {
+                failures.Add(new ValidationFailure(error.PropertyName, error.ErrorCode, error.ErrorMessage));
+            }
+
+            return new ValidationReport(failures);
+        }
+    }
+}
+
+namespace DomainFixture.Tests.Generation
+{
+    internal sealed class UsernameValidationImmutableReconstruction : Username
     {
         private UsernameValidationImmutableReconstruction()
         {
         }
 
-        internal static global::DomainFixture.Tests.Domain.ValueObjects.Username WithValue(global::DomainFixture.Tests.Domain.ValueObjects.Username source, string value)
+        internal static Username WithValue(Username source, string value)
         {
-            return new UsernameValidationImmutableReconstruction
-            {
-                Value = value
-            };
+            return new UsernameValidationImmutableReconstruction{Value = value};
         }
     }
 }

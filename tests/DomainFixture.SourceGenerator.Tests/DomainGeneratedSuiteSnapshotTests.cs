@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using DomainFixture.Contracts;
 using DomainFixture.SourceGenerator;
 using DomainFixture.Tests.Domain.Entities;
 using DomainFixture.Validation;
@@ -26,7 +27,11 @@ public sealed class DomainGeneratedSuiteSnapshotTests
             File.ReadAllText(Path.Combine(sourceDirectory, "Inputs", "RegistrationRequestFixture.cs")),
             File.ReadAllText(Path.Combine(sourceDirectory, "Inputs", "UsernameFixture.cs")),
             File.ReadAllText(Path.Combine(sourceDirectory, "Inputs", "QualifiedNameFixture.cs")),
-            File.ReadAllText(Path.Combine(sourceDirectory, "Inputs", "QualifiedHandleFixture.cs"))
+            File.ReadAllText(Path.Combine(sourceDirectory, "Inputs", "QualifiedHandleFixture.cs")),
+            File.ReadAllText(Path.Combine(sourceDirectory, "Inputs", "RegistrationFixture.cs")),
+            File.ReadAllText(Path.Combine(sourceDirectory, "Inputs", "SubscriptionFixture.cs")),
+            File.ReadAllText(Path.Combine(sourceDirectory, "Inputs", "ResultDisplayNameFixture.cs")),
+            File.ReadAllText(Path.Combine(sourceDirectory, "Inputs", "TenantSubscriptionFixture.cs"))
         };
         var compilation = CSharpCompilation.Create(
             $"DomainSnapshot_{Guid.NewGuid():N}",
@@ -64,14 +69,61 @@ public sealed class DomainGeneratedSuiteSnapshotTests
                 RelativePath: "Snapshots/DomainFixture.Tests.Domain/QualifiedNameFixture.Validation.verified.cs"),
             (
                 HintName: "QualifiedHandleFixture.Validation.g.cs",
-                RelativePath: "Snapshots/DomainFixture.Tests.Domain/QualifiedHandleFixture.Validation.verified.cs")
+                RelativePath: "Snapshots/DomainFixture.Tests.Domain/QualifiedHandleFixture.Validation.verified.cs"),
+            (
+                HintName: "UsernameFixture.Factory.g.cs",
+                RelativePath: "Snapshots/DomainFixture.Tests.Domain/UsernameFixture.Factory.verified.cs"),
+            (
+                HintName: "RegistrationFixture.Pending.g.cs",
+                RelativePath: "Snapshots/DomainFixture.Tests.Domain/RegistrationFixture.Pending.verified.cs"),
+            (
+                HintName: "RegistrationFixture.Approved.g.cs",
+                RelativePath: "Snapshots/DomainFixture.Tests.Domain/RegistrationFixture.Approved.verified.cs"),
+            (
+                HintName: "RegistrationFixture.Factory.g.cs",
+                RelativePath: "Snapshots/DomainFixture.Tests.Domain/RegistrationFixture.Factory.verified.cs"),
+            (
+                HintName: "SubscriptionFixture.Valid.g.cs",
+                RelativePath: "Snapshots/DomainFixture.Tests.Domain/SubscriptionFixture.Valid.verified.cs"),
+            (
+                HintName: "SubscriptionFixture.Factory.g.cs",
+                RelativePath: "Snapshots/DomainFixture.Tests.Domain/SubscriptionFixture.Factory.verified.cs"),
+            (
+                HintName: "ResultDisplayNameFixture.Valid.g.cs",
+                RelativePath: "Snapshots/DomainFixture.Tests.Domain/ResultDisplayNameFixture.Valid.verified.cs"),
+            (
+                HintName: "ResultDisplayNameFixture.Factory.g.cs",
+                RelativePath: "Snapshots/DomainFixture.Tests.Domain/ResultDisplayNameFixture.Factory.verified.cs"),
+            (
+                HintName: "TenantSubscriptionFixture.Valid.g.cs",
+                RelativePath: "Snapshots/DomainFixture.Tests.Domain/TenantSubscriptionFixture.Valid.verified.cs"),
+            (
+                HintName: "TenantSubscriptionFixture.Factory.g.cs",
+                RelativePath: "Snapshots/DomainFixture.Tests.Domain/TenantSubscriptionFixture.Factory.verified.cs")
         };
 
         foreach (var expected in snapshots)
         {
             var generatedSource = NormalizeNewlines(result.GeneratedTrees
-                .Single(tree => tree.FilePath.EndsWith(expected.HintName))
+                .Single(tree => HasHintName(tree.FilePath, expected.HintName))
                 .ToString());
+            if (string.Equals(
+                    Environment.GetEnvironmentVariable("UPDATE_DOMAIN_FIXTURE_SNAPSHOTS"),
+                    "1",
+                    StringComparison.Ordinal))
+            {
+                var projectDirectory = Path.GetFullPath(Path.Combine(
+                    sourceDirectory,
+                    "..",
+                    "..",
+                    ".."));
+                var sourceSnapshotPath = Path.Combine(
+                    projectDirectory,
+                    expected.RelativePath.Replace('/', Path.DirectorySeparatorChar));
+                File.WriteAllText(sourceSnapshotPath, generatedSource);
+                continue;
+            }
+
             var snapshotPath = Path.Combine(
                 sourceDirectory,
                 expected.RelativePath.Replace('/', Path.DirectorySeparatorChar));
@@ -95,11 +147,20 @@ public sealed class DomainGeneratedSuiteSnapshotTests
             .Select(path => MetadataReference.CreateFromFile(path))
             .ToList();
         references.Add(MetadataReference.CreateFromFile(typeof(IFixtureValidator<>).Assembly.Location));
+        references.Add(MetadataReference.CreateFromFile(typeof(DomainConstraintContract).Assembly.Location));
         references.Add(MetadataReference.CreateFromFile(typeof(AbstractValidator<>).Assembly.Location));
         references.Add(MetadataReference.CreateFromFile(typeof(RegistrationRequest).Assembly.Location));
         references.Add(MetadataReference.CreateFromFile(typeof(TestAttribute).Assembly.Location));
 
         return references;
+    }
+
+    private static bool HasHintName(string filePath, string hintName)
+    {
+        if (!filePath.EndsWith(hintName, StringComparison.Ordinal))
+            return false;
+        var start = filePath.Length - hintName.Length;
+        return start == 0 || filePath[start - 1] is '.' or '/' or '\\';
     }
 
     private static void AssertSnapshot(string expected, string actual, string snapshotPath)

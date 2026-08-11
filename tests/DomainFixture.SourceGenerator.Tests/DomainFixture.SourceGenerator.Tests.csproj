@@ -20,6 +20,7 @@
     <ItemGroup>
         <ProjectReference Include="..\..\src\DomainFixture\DomainFixture.csproj" />
         <ProjectReference Include="..\..\src\DomainFixture.SourceGenerator\DomainFixture.SourceGenerator.csproj" />
+        <ProjectReference Include="..\..\src\DomainFixture.TestGenerator\DomainFixture.TestGenerator.csproj" />
         <ProjectReference Include="..\DomainFixture.Tests.Domain\DomainFixture.Tests.Domain.csproj" />
     </ItemGroup>
 
@@ -38,6 +39,18 @@
               CopyToOutputDirectory="PreserveNewest" />
         <None Include="..\DomainFixture.Tests\Generation\QualifiedHandleFixture.cs"
               Link="Inputs\QualifiedHandleFixture.cs"
+              CopyToOutputDirectory="PreserveNewest" />
+        <None Include="..\DomainFixture.Tests\Generation\RegistrationFixture.cs"
+              Link="Inputs\RegistrationFixture.cs"
+              CopyToOutputDirectory="PreserveNewest" />
+        <None Include="..\DomainFixture.Tests\Generation\SubscriptionFixture.cs"
+              Link="Inputs\SubscriptionFixture.cs"
+              CopyToOutputDirectory="PreserveNewest" />
+        <None Include="..\DomainFixture.Tests\Generation\ResultDisplayNameFixture.cs"
+              Link="Inputs\ResultDisplayNameFixture.cs"
+              CopyToOutputDirectory="PreserveNewest" />
+        <None Include="..\DomainFixture.Tests\Generation\TenantSubscriptionFixture.cs"
+              Link="Inputs\TenantSubscriptionFixture.cs"
               CopyToOutputDirectory="PreserveNewest" />
         <Compile Remove="Snapshots\**\*.verified.cs" />
         <None Include="Snapshots\**\*.verified.cs"

@@ -1,5 +1,12 @@
 using System.CodeDom.Compiler;
 using NUnit.Framework;
+using System.Collections.Generic;
+using IFixtureValidator = global::DomainFixture.Validation.IFixtureValidator<global::DomainFixture.Tests.Domain.Entities.RegistrationRequest>;
+using RegistrationRequest = global::DomainFixture.Tests.Domain.Entities.RegistrationRequest;
+using RegistrationRequestValidator = global::DomainFixture.Tests.Domain.Entities.RegistrationRequestValidator;
+using ValidationContext = global::FluentValidation.ValidationContext<global::DomainFixture.Tests.Domain.Entities.RegistrationRequest>;
+using ValidationFailure = global::DomainFixture.Validation.ValidationFailure;
+using ValidationReport = global::DomainFixture.Validation.ValidationReport;
 
 namespace DomainFixture.Tests.Generation
 {
@@ -10,8 +17,8 @@ namespace DomainFixture.Tests.Generation
         [Test]
         public void Registration_Baseline_IsValid()
         {
-            global::DomainFixture.Tests.Domain.Entities.RegistrationRequest subject = global::DomainFixture.Tests.Generation.RegistrationRequestFixture.Baseline();
-            var validator = new global::DomainFixture.Tests.Generation.RegistrationRequestRegistrationFluentValidationAdapter();
+            RegistrationRequest subject = RegistrationRequestFixture.Baseline();
+            var validator = new RegistrationRequestRegistrationFluentValidationAdapter();
             var report = validator.Validate(subject);
             Assert.That(report.IsValid, Is.True);
         }
@@ -19,9 +26,9 @@ namespace DomainFixture.Tests.Generation
         [Test]
         public void Registration_Description_LengthBelowMinimum_IsInvalid()
         {
-            global::DomainFixture.Tests.Domain.Entities.RegistrationRequest subject = global::DomainFixture.Tests.Generation.RegistrationRequestFixture.Baseline();
+            RegistrationRequest subject = RegistrationRequestFixture.Baseline();
             subject.Description = new string ('a', 3);
-            var validator = new global::DomainFixture.Tests.Generation.RegistrationRequestRegistrationFluentValidationAdapter();
+            var validator = new RegistrationRequestRegistrationFluentValidationAdapter();
             var report = validator.Validate(subject);
             Assert.That(report.ContainsFailure("Description", "DESCRIPTION_LENGTH"), Is.True);
         }
@@ -29,9 +36,9 @@ namespace DomainFixture.Tests.Generation
         [Test]
         public void Registration_Description_LengthAtMinimum_IsValid()
         {
-            global::DomainFixture.Tests.Domain.Entities.RegistrationRequest subject = global::DomainFixture.Tests.Generation.RegistrationRequestFixture.Baseline();
+            RegistrationRequest subject = RegistrationRequestFixture.Baseline();
             subject.Description = new string ('a', 4);
-            var validator = new global::DomainFixture.Tests.Generation.RegistrationRequestRegistrationFluentValidationAdapter();
+            var validator = new RegistrationRequestRegistrationFluentValidationAdapter();
             var report = validator.Validate(subject);
             Assert.That(report.IsValid, Is.True);
         }
@@ -39,9 +46,9 @@ namespace DomainFixture.Tests.Generation
         [Test]
         public void Registration_Description_LengthAtMaximum_IsValid()
         {
-            global::DomainFixture.Tests.Domain.Entities.RegistrationRequest subject = global::DomainFixture.Tests.Generation.RegistrationRequestFixture.Baseline();
+            RegistrationRequest subject = RegistrationRequestFixture.Baseline();
             subject.Description = new string ('a', 8);
-            var validator = new global::DomainFixture.Tests.Generation.RegistrationRequestRegistrationFluentValidationAdapter();
+            var validator = new RegistrationRequestRegistrationFluentValidationAdapter();
             var report = validator.Validate(subject);
             Assert.That(report.IsValid, Is.True);
         }
@@ -49,9 +56,9 @@ namespace DomainFixture.Tests.Generation
         [Test]
         public void Registration_Description_LengthAboveMaximum_IsInvalid()
         {
-            global::DomainFixture.Tests.Domain.Entities.RegistrationRequest subject = global::DomainFixture.Tests.Generation.RegistrationRequestFixture.Baseline();
+            RegistrationRequest subject = RegistrationRequestFixture.Baseline();
             subject.Description = new string ('a', 9);
-            var validator = new global::DomainFixture.Tests.Generation.RegistrationRequestRegistrationFluentValidationAdapter();
+            var validator = new RegistrationRequestRegistrationFluentValidationAdapter();
             var report = validator.Validate(subject);
             Assert.That(report.ContainsFailure("Description", "DESCRIPTION_LENGTH"), Is.True);
         }
@@ -59,9 +66,9 @@ namespace DomainFixture.Tests.Generation
         [Test]
         public void Registration_Description_NotEmpty_Empty_IsInvalid()
         {
-            global::DomainFixture.Tests.Domain.Entities.RegistrationRequest subject = global::DomainFixture.Tests.Generation.RegistrationRequestFixture.Baseline();
+            RegistrationRequest subject = RegistrationRequestFixture.Baseline();
             subject.Description = "";
-            var validator = new global::DomainFixture.Tests.Generation.RegistrationRequestRegistrationFluentValidationAdapter();
+            var validator = new RegistrationRequestRegistrationFluentValidationAdapter();
             var report = validator.Validate(subject);
             Assert.That(report.ContainsFailure("Description", "DESCRIPTION_NOT_EMPTY"), Is.True);
         }
@@ -69,9 +76,9 @@ namespace DomainFixture.Tests.Generation
         [Test]
         public void Registration_Description_NotNull_Null_IsInvalid()
         {
-            global::DomainFixture.Tests.Domain.Entities.RegistrationRequest subject = global::DomainFixture.Tests.Generation.RegistrationRequestFixture.Baseline();
+            RegistrationRequest subject = RegistrationRequestFixture.Baseline();
             subject.Description = null;
-            var validator = new global::DomainFixture.Tests.Generation.RegistrationRequestRegistrationFluentValidationAdapter();
+            var validator = new RegistrationRequestRegistrationFluentValidationAdapter();
             var report = validator.Validate(subject);
             Assert.That(report.ContainsFailure("Description", "DESCRIPTION_REQUIRED"), Is.True);
         }
@@ -80,21 +87,20 @@ namespace DomainFixture.Tests.Generation
 
 namespace DomainFixture.Tests.Generation
 {
-    internal sealed class RegistrationRequestRegistrationFluentValidationAdapter : global::DomainFixture.Validation.IFixtureValidator<global::DomainFixture.Tests.Domain.Entities.RegistrationRequest>
+    internal sealed class RegistrationRequestRegistrationFluentValidationAdapter : IFixtureValidator
     {
-        private readonly global::DomainFixture.Tests.Domain.Entities.RegistrationRequestValidator _validator = new global::DomainFixture.Tests.Domain.Entities.RegistrationRequestValidator();
-
-        public global::DomainFixture.Validation.ValidationReport Validate(global::DomainFixture.Tests.Domain.Entities.RegistrationRequest subject)
+        private readonly RegistrationRequestValidator _validator = new RegistrationRequestValidator();
+        public ValidationReport Validate(RegistrationRequest subject)
         {
-            var context = new global::FluentValidation.ValidationContext<global::DomainFixture.Tests.Domain.Entities.RegistrationRequest>(subject);
+            var context = new ValidationContext(subject);
             var result = _validator.Validate(context);
-            var failures = new global::System.Collections.Generic.List<global::DomainFixture.Validation.ValidationFailure>();
+            var failures = new List<ValidationFailure>();
             foreach (var error in result.Errors)
             {
-                failures.Add(new global::DomainFixture.Validation.ValidationFailure(error.PropertyName, error.ErrorCode, error.ErrorMessage));
+                failures.Add(new ValidationFailure(error.PropertyName, error.ErrorCode, error.ErrorMessage));
             }
 
-            return new global::DomainFixture.Validation.ValidationReport(failures);
+            return new ValidationReport(failures);
         }
     }
 }

@@ -1,5 +1,12 @@
 using System.CodeDom.Compiler;
 using NUnit.Framework;
+using System.Collections.Generic;
+using IFixtureValidator = global::DomainFixture.Validation.IFixtureValidator<global::DomainFixture.Tests.Domain.ValueObjects.QualifiedName>;
+using QualifiedName = global::DomainFixture.Tests.Domain.ValueObjects.QualifiedName;
+using QualifiedNameValidator = global::DomainFixture.Tests.Domain.ValueObjects.QualifiedNameValidator;
+using ValidationContext = global::FluentValidation.ValidationContext<global::DomainFixture.Tests.Domain.ValueObjects.QualifiedName>;
+using ValidationFailure = global::DomainFixture.Validation.ValidationFailure;
+using ValidationReport = global::DomainFixture.Validation.ValidationReport;
 
 namespace DomainFixture.Tests.Generation
 {
@@ -10,8 +17,8 @@ namespace DomainFixture.Tests.Generation
         [Test]
         public void Validation_Baseline_IsValid()
         {
-            global::DomainFixture.Tests.Domain.ValueObjects.QualifiedName subject = global::DomainFixture.Tests.Generation.QualifiedNameFixture.Baseline();
-            var validator = new global::DomainFixture.Tests.Generation.QualifiedNameValidationFluentValidationAdapter();
+            QualifiedName subject = QualifiedNameFixture.Baseline();
+            var validator = new QualifiedNameValidationFluentValidationAdapter();
             var report = validator.Validate(subject);
             Assert.That(report.IsValid, Is.True);
         }
@@ -19,9 +26,9 @@ namespace DomainFixture.Tests.Generation
         [Test]
         public void Validation_Name_LengthAtMaximum_IsValid()
         {
-            global::DomainFixture.Tests.Domain.ValueObjects.QualifiedName subject = global::DomainFixture.Tests.Generation.QualifiedNameFixture.Baseline();
-            subject = global::DomainFixture.Tests.Generation.QualifiedNameValidationImmutableReconstruction.WithName(subject, new string ('a', 32));
-            var validator = new global::DomainFixture.Tests.Generation.QualifiedNameValidationFluentValidationAdapter();
+            QualifiedName subject = QualifiedNameFixture.Baseline();
+            subject = QualifiedNameValidationImmutableReconstruction.WithName(subject, new string ('a', 32));
+            var validator = new QualifiedNameValidationFluentValidationAdapter();
             var report = validator.Validate(subject);
             Assert.That(report.IsValid, Is.True);
         }
@@ -29,9 +36,9 @@ namespace DomainFixture.Tests.Generation
         [Test]
         public void Validation_Name_LengthAboveMaximum_IsInvalid()
         {
-            global::DomainFixture.Tests.Domain.ValueObjects.QualifiedName subject = global::DomainFixture.Tests.Generation.QualifiedNameFixture.Baseline();
-            subject = global::DomainFixture.Tests.Generation.QualifiedNameValidationImmutableReconstruction.WithName(subject, new string ('a', 33));
-            var validator = new global::DomainFixture.Tests.Generation.QualifiedNameValidationFluentValidationAdapter();
+            QualifiedName subject = QualifiedNameFixture.Baseline();
+            subject = QualifiedNameValidationImmutableReconstruction.WithName(subject, new string ('a', 33));
+            var validator = new QualifiedNameValidationFluentValidationAdapter();
             var report = validator.Validate(subject);
             Assert.That(report.ContainsFailure("Name"), Is.True);
         }
@@ -39,9 +46,9 @@ namespace DomainFixture.Tests.Generation
         [Test]
         public void Validation_Name_NotEmpty_Empty_IsInvalid()
         {
-            global::DomainFixture.Tests.Domain.ValueObjects.QualifiedName subject = global::DomainFixture.Tests.Generation.QualifiedNameFixture.Baseline();
-            subject = global::DomainFixture.Tests.Generation.QualifiedNameValidationImmutableReconstruction.WithName(subject, "");
-            var validator = new global::DomainFixture.Tests.Generation.QualifiedNameValidationFluentValidationAdapter();
+            QualifiedName subject = QualifiedNameFixture.Baseline();
+            subject = QualifiedNameValidationImmutableReconstruction.WithName(subject, "");
+            var validator = new QualifiedNameValidationFluentValidationAdapter();
             var report = validator.Validate(subject);
             Assert.That(report.ContainsFailure("Name"), Is.True);
         }
@@ -49,9 +56,9 @@ namespace DomainFixture.Tests.Generation
         [Test]
         public void Validation_Realm_LengthAtMaximum_IsValid()
         {
-            global::DomainFixture.Tests.Domain.ValueObjects.QualifiedName subject = global::DomainFixture.Tests.Generation.QualifiedNameFixture.Baseline();
-            subject = global::DomainFixture.Tests.Generation.QualifiedNameValidationImmutableReconstruction.WithRealm(subject, new string ('a', 16));
-            var validator = new global::DomainFixture.Tests.Generation.QualifiedNameValidationFluentValidationAdapter();
+            QualifiedName subject = QualifiedNameFixture.Baseline();
+            subject = QualifiedNameValidationImmutableReconstruction.WithRealm(subject, new string ('a', 16));
+            var validator = new QualifiedNameValidationFluentValidationAdapter();
             var report = validator.Validate(subject);
             Assert.That(report.IsValid, Is.True);
         }
@@ -59,9 +66,9 @@ namespace DomainFixture.Tests.Generation
         [Test]
         public void Validation_Realm_LengthAboveMaximum_IsInvalid()
         {
-            global::DomainFixture.Tests.Domain.ValueObjects.QualifiedName subject = global::DomainFixture.Tests.Generation.QualifiedNameFixture.Baseline();
-            subject = global::DomainFixture.Tests.Generation.QualifiedNameValidationImmutableReconstruction.WithRealm(subject, new string ('a', 17));
-            var validator = new global::DomainFixture.Tests.Generation.QualifiedNameValidationFluentValidationAdapter();
+            QualifiedName subject = QualifiedNameFixture.Baseline();
+            subject = QualifiedNameValidationImmutableReconstruction.WithRealm(subject, new string ('a', 17));
+            var validator = new QualifiedNameValidationFluentValidationAdapter();
             var report = validator.Validate(subject);
             Assert.That(report.ContainsFailure("Realm"), Is.True);
         }
@@ -69,9 +76,9 @@ namespace DomainFixture.Tests.Generation
         [Test]
         public void Validation_Realm_NotEmpty_Empty_IsInvalid()
         {
-            global::DomainFixture.Tests.Domain.ValueObjects.QualifiedName subject = global::DomainFixture.Tests.Generation.QualifiedNameFixture.Baseline();
-            subject = global::DomainFixture.Tests.Generation.QualifiedNameValidationImmutableReconstruction.WithRealm(subject, "");
-            var validator = new global::DomainFixture.Tests.Generation.QualifiedNameValidationFluentValidationAdapter();
+            QualifiedName subject = QualifiedNameFixture.Baseline();
+            subject = QualifiedNameValidationImmutableReconstruction.WithRealm(subject, "");
+            var validator = new QualifiedNameValidationFluentValidationAdapter();
             var report = validator.Validate(subject);
             Assert.That(report.ContainsFailure("Realm"), Is.True);
         }
@@ -79,9 +86,9 @@ namespace DomainFixture.Tests.Generation
         [Test]
         public void Validation_Name_NotNull_Null_IsInvalid()
         {
-            global::DomainFixture.Tests.Domain.ValueObjects.QualifiedName subject = global::DomainFixture.Tests.Generation.QualifiedNameFixture.Baseline();
-            subject = global::DomainFixture.Tests.Generation.QualifiedNameValidationImmutableReconstruction.WithName(subject, null);
-            var validator = new global::DomainFixture.Tests.Generation.QualifiedNameValidationFluentValidationAdapter();
+            QualifiedName subject = QualifiedNameFixture.Baseline();
+            subject = QualifiedNameValidationImmutableReconstruction.WithName(subject, null);
+            var validator = new QualifiedNameValidationFluentValidationAdapter();
             var report = validator.Validate(subject);
             Assert.That(report.ContainsFailure("Name"), Is.True);
         }
@@ -89,60 +96,68 @@ namespace DomainFixture.Tests.Generation
         [Test]
         public void Validation_Realm_NotNull_Null_IsInvalid()
         {
-            global::DomainFixture.Tests.Domain.ValueObjects.QualifiedName subject = global::DomainFixture.Tests.Generation.QualifiedNameFixture.Baseline();
-            subject = global::DomainFixture.Tests.Generation.QualifiedNameValidationImmutableReconstruction.WithRealm(subject, null);
-            var validator = new global::DomainFixture.Tests.Generation.QualifiedNameValidationFluentValidationAdapter();
+            QualifiedName subject = QualifiedNameFixture.Baseline();
+            subject = QualifiedNameValidationImmutableReconstruction.WithRealm(subject, null);
+            var validator = new QualifiedNameValidationFluentValidationAdapter();
             var report = validator.Validate(subject);
             Assert.That(report.ContainsFailure("Realm"), Is.True);
         }
-    }
-}
 
-namespace DomainFixture.Tests.Generation
-{
-    internal sealed class QualifiedNameValidationFluentValidationAdapter : global::DomainFixture.Validation.IFixtureValidator<global::DomainFixture.Tests.Domain.ValueObjects.QualifiedName>
-    {
-        private readonly global::DomainFixture.Tests.Domain.ValueObjects.QualifiedNameValidator _validator = new global::DomainFixture.Tests.Domain.ValueObjects.QualifiedNameValidator();
-
-        public global::DomainFixture.Validation.ValidationReport Validate(global::DomainFixture.Tests.Domain.ValueObjects.QualifiedName subject)
+        [Test]
+        public void Validation_Construction_From_Name_Realm_BaselineSucceeds()
         {
-            var context = new global::FluentValidation.ValidationContext<global::DomainFixture.Tests.Domain.ValueObjects.QualifiedName>(subject);
-            var result = _validator.Validate(context);
-            var failures = new global::System.Collections.Generic.List<global::DomainFixture.Validation.ValidationFailure>();
-            foreach (var error in result.Errors)
-            {
-                failures.Add(new global::DomainFixture.Validation.ValidationFailure(error.PropertyName, error.ErrorCode, error.ErrorMessage));
-            }
+            QualifiedName baseline = QualifiedNameFixture.Baseline();
+            QualifiedName constructed = QualifiedName.From(baseline.Name, baseline.Realm);
+            Assert.That(constructed, Is.Not.Null);
+        }
 
-            return new global::DomainFixture.Validation.ValidationReport(failures);
+        [Test]
+        public void Validation_Construction_From_Name_Realm_ArgumentsRoundTrip()
+        {
+            QualifiedName baseline = QualifiedNameFixture.Baseline();
+            QualifiedName constructed = QualifiedName.From(baseline.Name, baseline.Realm);
+            Assert.That(constructed.Name, Is.EqualTo(baseline.Name));
+            Assert.That(constructed.Realm, Is.EqualTo(baseline.Realm));
         }
     }
 }
 
 namespace DomainFixture.Tests.Generation
 {
-    internal sealed class QualifiedNameValidationImmutableReconstruction : global::DomainFixture.Tests.Domain.ValueObjects.QualifiedName
+    internal sealed class QualifiedNameValidationFluentValidationAdapter : IFixtureValidator
+    {
+        private readonly QualifiedNameValidator _validator = new QualifiedNameValidator();
+        public ValidationReport Validate(QualifiedName subject)
+        {
+            var context = new ValidationContext(subject);
+            var result = _validator.Validate(context);
+            var failures = new List<ValidationFailure>();
+            foreach (var error in result.Errors)
+            {
+                failures.Add(new ValidationFailure(error.PropertyName, error.ErrorCode, error.ErrorMessage));
+            }
+
+            return new ValidationReport(failures);
+        }
+    }
+}
+
+namespace DomainFixture.Tests.Generation
+{
+    internal sealed class QualifiedNameValidationImmutableReconstruction : QualifiedName
     {
         private QualifiedNameValidationImmutableReconstruction()
         {
         }
 
-        internal static global::DomainFixture.Tests.Domain.ValueObjects.QualifiedName WithName(global::DomainFixture.Tests.Domain.ValueObjects.QualifiedName source, string value)
+        internal static QualifiedName WithName(QualifiedName source, string value)
         {
-            return new QualifiedNameValidationImmutableReconstruction
-            {
-                Name = value,
-                Realm = source.Realm
-            };
+            return new QualifiedNameValidationImmutableReconstruction{Name = value, Realm = source.Realm};
         }
 
-        internal static global::DomainFixture.Tests.Domain.ValueObjects.QualifiedName WithRealm(global::DomainFixture.Tests.Domain.ValueObjects.QualifiedName source, string value)
+        internal static QualifiedName WithRealm(QualifiedName source, string value)
         {
-            return new QualifiedNameValidationImmutableReconstruction
-            {
-                Name = source.Name,
-                Realm = value
-            };
+            return new QualifiedNameValidationImmutableReconstruction{Name = source.Name, Realm = value};
         }
     }
 }

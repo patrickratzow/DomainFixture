@@ -1,11 +1,12 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using DomainFixture.Contracts;
 using DomainFixture.SourceGenerator.Models;
 
 namespace DomainFixture.SourceGenerator.Extraction;
 
-internal static class ConventionRuleProvider
+internal static class ConventionConstraintProvider
 {
     private static readonly string[] NonEmptyNameSuffixes =
     {
@@ -16,7 +17,7 @@ internal static class ConventionRuleProvider
         "Description"
     };
 
-    public static IEnumerable<ValidationRuleSpec> Create(
+    public static IEnumerable<DiscoveredDomainConstraint> Create(
         FixtureGenerationSpec configuration,
         GenerationProfileSpec profile,
         string validationRulesTypeKey)
@@ -29,7 +30,7 @@ internal static class ConventionRuleProvider
                     configuration,
                     property,
                     validationRulesTypeKey,
-                    ValidationRuleKind.NotNull);
+                    DomainConstraintKinds.TextNotNull);
             }
 
             if (profile.UsePropertyNames && HasNonEmptySemantic(property.Name))
@@ -38,7 +39,7 @@ internal static class ConventionRuleProvider
                     configuration,
                     property,
                     validationRulesTypeKey,
-                    ValidationRuleKind.NotEmpty);
+                    DomainConstraintKinds.TextNotEmpty);
             }
         }
     }
@@ -47,16 +48,16 @@ internal static class ConventionRuleProvider
         NonEmptyNameSuffixes.Any(suffix =>
             propertyName.EndsWith(suffix, StringComparison.OrdinalIgnoreCase));
 
-    private static ValidationRuleSpec CreateRule(
+    private static DiscoveredDomainConstraint CreateRule(
         FixtureGenerationSpec configuration,
         SubjectPropertySpec property,
         string validationRulesTypeKey,
-        ValidationRuleKind kind) =>
+        string kindId) =>
         new(
             validationRulesTypeKey,
             configuration.SubjectTypeName,
             property.Name,
-            kind,
+            kindId,
             minimum: null,
             maximum: null,
             errorCode: null,

@@ -21,6 +21,32 @@ public interface IFixtureGenerationOptions
     IFixtureMutationOptions Mutations();
 
     IFixtureValidationOptions Validation();
+
+    IFixtureOperationOptions Operations();
+
+    IFixtureValueOptions Values();
+}
+
+/// <summary>
+/// Supplies deterministic values when conventions cannot safely infer one. Expressions are
+/// analyzed at compile time and are never invoked by DomainFixture.
+/// </summary>
+public interface IFixtureValueOptions
+{
+    IFixtureValueOptions For<TValue>(Expression<Func<TValue>> value);
+}
+
+public interface IFixtureOperationOptions
+{
+    IFixtureOperationOptions RejectWith<TException>()
+        where TException : Exception;
+
+    IFixtureOperationOptions RejectWith<TSubject, TException>()
+        where TException : Exception;
+
+    IFixtureOperationOptions UseResult<TSubject, TResult>(
+        Expression<Func<TResult, bool>> isSuccess,
+        Expression<Func<TResult, TSubject>> value);
 }
 
 public interface IFixtureValidationOptions
@@ -42,6 +68,8 @@ public interface IFixtureConventionOptions
     IFixtureConventionOptions UsePropertyNames();
 
     IFixtureConventionOptions UseImmutableObjects();
+
+    IFixtureConventionOptions UseEntityIdentity();
 }
 
 /// <summary>

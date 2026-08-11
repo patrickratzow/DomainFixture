@@ -11,5 +11,5 @@ public sealed class QualifiedHandleFixture : IFixtureTestConfiguration<Qualified
             .Baseline(Baseline);
     }
 
-    public static QualifiedHandle Baseline() => new("alice", "example");
+    public static QualifiedHandle Baseline() => new("alice", "example", 5);
 }

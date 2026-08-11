@@ -3,14 +3,14 @@ using Microsoft.CodeAnalysis;
 
 namespace DomainFixture.SourceGenerator.Models;
 
-internal sealed class ValidationRuleProviderSet
+internal sealed class DomainConstraintProviderSet
 {
-    public IncrementalValueProvider<ImmutableArray<RuleExtractionResult>> SourceResults { get; }
-    public IncrementalValueProvider<ImmutableArray<RuleExtractionResult>> AllResults { get; }
+    public IncrementalValueProvider<ImmutableArray<ConstraintExtractionResult>> SourceResults { get; }
+    public IncrementalValueProvider<ImmutableArray<ConstraintExtractionResult>> AllResults { get; }
 
-    public ValidationRuleProviderSet(
-        IncrementalValueProvider<ImmutableArray<RuleExtractionResult>> sourceResults,
-        IncrementalValueProvider<ImmutableArray<RuleExtractionResult>> allResults)
+    public DomainConstraintProviderSet(
+        IncrementalValueProvider<ImmutableArray<ConstraintExtractionResult>> sourceResults,
+        IncrementalValueProvider<ImmutableArray<ConstraintExtractionResult>> allResults)
     {
         SourceResults = sourceResults;
         AllResults = allResults;
