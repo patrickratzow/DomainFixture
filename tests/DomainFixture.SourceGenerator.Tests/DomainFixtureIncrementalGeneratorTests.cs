@@ -92,12 +92,112 @@ public class DomainFixtureIncrementalGeneratorTests
     [Test]
     public void Generator_ShouldReportDiagnostic_WhenManifestPropertyCannotBeAssigned()
     {
-        var rulesAssembly = CompileReference(ExternalRulesSource.Replace("true)]", "false)]"));
+        var rulesAssembly = CompileReference(ExternalRulesSource
+            .Replace("true)]", "false)]")
+            .Replace("get; set;", "get; private set;"));
 
-        var result = RunGenerator(MetadataConsumerSource, out _, rulesAssembly);
+        var result = RunGenerator(
+            MetadataConsumerSource.Replace(
+                "new() { Description = \"baseline\" }",
+                "new()"),
+            out _,
+            rulesAssembly);
 
         result.Diagnostics.Should().ContainSingle(diagnostic => diagnostic.Id == "DFG005");
         result.GeneratedTrees.Should().BeEmpty();
+    }
+
+    [Test]
+    public void Generator_ShouldUseRecordWith_ForSealedRecords()
+    {
+        var source = WithImmutableObjects(ValidSource)
+            .Replace(
+                @"public sealed class User
+    {
+        public string Description { get; set; } = string.Empty;
+    }",
+                @"public sealed record User(string Description, string Realm);")
+            .Replace(
+                "new() { Description = \"baseline\" }",
+                "new(\"baseline\", \"realm\")");
+
+        var result = RunGenerator(source, out var outputCompilation);
+
+        result.Diagnostics.Should().BeEmpty();
+        result.GeneratedTrees.Single(tree => tree.FilePath.EndsWith(
+                "UserFixtureConfiguration.Registration.g.cs")).ToString().Should()
+            .Contain("return source with { Description = value };")
+            .And.NotContain("subject.Description =");
+        outputCompilation.GetDiagnostics()
+            .Where(diagnostic => diagnostic.Severity == DiagnosticSeverity.Error)
+            .Should().BeEmpty();
+    }
+
+    [Test]
+    public void Generator_ShouldUseConstructorReconstruction_ForSealedConstructorOnlyTypes()
+    {
+        var source = WithImmutableObjects(ValidSource)
+            .Replace(
+                @"public sealed class User
+    {
+        public string Description { get; set; } = string.Empty;
+    }",
+                @"public sealed class User
+    {
+        public User(string description, string realm)
+        {
+            Description = description;
+            Realm = realm;
+        }
+
+        public string Description { get; }
+        public string Realm { get; }
+    }")
+            .Replace(
+                "new() { Description = \"baseline\" }",
+                "new(\"baseline\", \"realm\")");
+
+        var result = RunGenerator(source, out var outputCompilation);
+
+        result.Diagnostics.Should().BeEmpty();
+        result.GeneratedTrees.Single(tree => tree.FilePath.EndsWith(
+                "UserFixtureConfiguration.Registration.g.cs")).ToString().Should()
+            .Contain("return new global::Consumer.User(value, source.Realm);");
+        outputCompilation.GetDiagnostics()
+            .Where(diagnostic => diagnostic.Severity == DiagnosticSeverity.Error)
+            .Should().BeEmpty();
+    }
+
+    [Test]
+    public void Generator_ShouldReportEveryUnsupportedBoundaryRule()
+    {
+        var source = WithImmutableObjects(ValidSource)
+            .Replace(
+                @"public sealed class User
+    {
+        public string Description { get; set; } = string.Empty;
+    }",
+                @"public sealed class User
+    {
+        private User(string description) => Description = description;
+
+        public string Description { get; }
+
+        public static User From(string description) => new(description);
+    }")
+            .Replace(
+                "new() { Description = \"baseline\" }",
+                "User.From(\"baseline\")");
+
+        var result = RunGenerator(source, out _);
+
+        result.Diagnostics.Where(diagnostic => diagnostic.Id == "DFG005")
+            .Should().HaveCount(3)
+            .And.OnlyContain(diagnostic =>
+                diagnostic.GetMessage(null).Contains("Consumer.User.Description") &&
+                diagnostic.GetMessage(null).Contains("no usable record 'with'"));
+        result.GeneratedTrees.Should().ContainSingle(tree => tree.FilePath.EndsWith(
+            "DomainFixture.ValidationRuleManifest.g.cs"));
     }
 
     [Test]
@@ -211,6 +311,10 @@ public class DomainFixtureIncrementalGeneratorTests
 
         return references;
     }
+
+    private static string WithImmutableObjects(string source) => source.Replace(
+        ".UsePropertyNames();",
+        ".UsePropertyNames()\n                .UseImmutableObjects();");
 
     private const string ValidSource = @"
 #nullable enable

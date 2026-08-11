@@ -36,6 +36,9 @@
         <None Include="..\DomainFixture.Tests\Generation\QualifiedNameFixture.cs"
               Link="Inputs\QualifiedNameFixture.cs"
               CopyToOutputDirectory="PreserveNewest" />
+        <None Include="..\DomainFixture.Tests\Generation\QualifiedHandleFixture.cs"
+              Link="Inputs\QualifiedHandleFixture.cs"
+              CopyToOutputDirectory="PreserveNewest" />
         <Compile Remove="Snapshots\**\*.verified.cs" />
         <None Include="Snapshots\**\*.verified.cs"
               CopyToOutputDirectory="PreserveNewest" />

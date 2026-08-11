@@ -3,6 +3,7 @@ using System.Collections.Immutable;
 using System.Linq;
 using System.Text;
 using DomainFixture.SourceGenerator.Diagnostics;
+using DomainFixture.SourceGenerator.Discovery;
 using DomainFixture.SourceGenerator.Extraction;
 using DomainFixture.SourceGenerator.Models;
 using DomainFixture.TestGenerator.Boundaries;
@@ -89,50 +90,64 @@ internal static class FixtureTestSourceEmitter
                 continue;
             }
 
-            string? generatedReconstruction = null;
-            var automaticProperties = matchingRules
-                .Where(rule =>
-                    !rule.PropertyCanBeAssigned &&
-                    !propertyMutations.ContainsKey(rule.PropertyName))
-                .Select(rule => configuration.SubjectProperties.FirstOrDefault(property =>
-                    property.Name == rule.PropertyName))
+            var reconstructionClassName =
+                $"{configuration.SubjectTypeShortName}{configuration.RecipeName}ImmutableReconstruction";
+            var resolutions = matchingRules
+                .Select(rule => rule.PropertyName)
+                .Distinct()
+                .Select(propertyName => configuration.SubjectProperties.FirstOrDefault(property =>
+                    property.Name == propertyName))
                 .Where(property => property is not null)
-                .Select(property => property!)
-                .GroupBy(property => property.Name)
-                .Select(group => group.First())
-                .ToArray();
-            if (automaticProperties.Length > 0 &&
-                profileResult.Profile.UseImmutableObjects &&
-                configuration.CanUseDerivedReconstruction &&
-                automaticProperties.All(property => property.CanSetFromDerivedType))
-            {
-                var reconstructionClassName =
-                    $"{configuration.SubjectTypeShortName}{configuration.RecipeName}ImmutableReconstruction";
-                generatedReconstruction = ImmutableObjectReconstructionEmitter.Emit(
+                .Select(property => PropertyMutationStrategyPipeline.Resolve(
                     configuration,
-                    reconstructionClassName,
-                    automaticProperties);
-                foreach (var property in automaticProperties)
+                    profileResult.Profile,
+                    property!,
+                    propertyMutations,
+                    reconstructionClassName))
+                .ToArray();
+            var missingProperties = matchingRules
+                .Where(rule => configuration.SubjectProperties.All(property =>
+                    property.Name != rule.PropertyName))
+                .ToArray();
+            foreach (var rule in missingProperties)
+            {
+                context.ReportDiagnostic(GeneratorDiagnostics.PropertyMutationUnavailable(
+                    rule.Location ?? configuration.Location,
+                    configuration.SubjectTypeName,
+                    rule.PropertyName,
+                    rule.Kind.ToString(),
+                    "the property could not be discovered on the subject type"));
+            }
+
+            var failedResolutions = resolutions
+                .Where(resolution => resolution.Strategy is null)
+                .ToArray();
+            foreach (var resolution in failedResolutions)
+            {
+                foreach (var rule in matchingRules.Where(rule =>
+                             rule.PropertyName == resolution.Property.Name))
                 {
-                    propertyMutations.Add(
-                        property.Name,
-                        new PropertyMutationSpec(
-                            configuration.SubjectTypeName,
-                            property.Name,
-                            $"global::{configuration.NamespaceName}.{reconstructionClassName}.With{property.Name}"));
+                    context.ReportDiagnostic(GeneratorDiagnostics.PropertyMutationUnavailable(
+                        rule.Location ?? configuration.Location,
+                        configuration.SubjectTypeName,
+                        rule.PropertyName,
+                        rule.Kind.ToString(),
+                        resolution.FailureReason!));
                 }
             }
 
-            var inaccessibleRule = matchingRules.FirstOrDefault(rule =>
-                !rule.PropertyCanBeAssigned &&
-                !propertyMutations.ContainsKey(rule.PropertyName));
-            if (inaccessibleRule is not null)
-            {
-                context.ReportDiagnostic(GeneratorDiagnostics.PropertySetterInaccessible(
-                    configuration.Location,
-                    inaccessibleRule.PropertyName));
+            if (missingProperties.Length > 0 || failedResolutions.Length > 0)
                 continue;
-            }
+
+            propertyMutations = resolutions
+                .Where(resolution => resolution.Mutation is not null)
+                .ToDictionary(
+                    resolution => resolution.Property.Name,
+                    resolution => resolution.Mutation!);
+            var generatedReconstruction = PropertyMutationReconstructionEmitter.Emit(
+                configuration,
+                reconstructionClassName,
+                resolutions);
 
             var cases = matchingRules
                 .SelectMany(GenerateCases)

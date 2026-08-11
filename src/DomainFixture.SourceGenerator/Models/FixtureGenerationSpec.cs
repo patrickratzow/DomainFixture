@@ -14,6 +14,8 @@ internal sealed class FixtureGenerationSpec
     public string? ValidatorFactoryExpression { get; }
     public string? ValidationRulesTypeKey { get; }
     public ImmutableArray<SubjectPropertySpec> SubjectProperties { get; }
+    public bool IsRecord { get; }
+    public ImmutableArray<SubjectConstructorSpec> ReconstructionConstructors { get; }
     public bool CanUseDerivedReconstruction { get; }
     public Location? Location { get; }
 
@@ -27,6 +29,8 @@ internal sealed class FixtureGenerationSpec
         string? validatorFactoryExpression,
         string? validationRulesTypeKey,
         ImmutableArray<SubjectPropertySpec> subjectProperties,
+        bool isRecord,
+        ImmutableArray<SubjectConstructorSpec> reconstructionConstructors,
         bool canUseDerivedReconstruction,
         Location? location)
     {
@@ -39,6 +43,8 @@ internal sealed class FixtureGenerationSpec
         ValidatorFactoryExpression = validatorFactoryExpression;
         ValidationRulesTypeKey = validationRulesTypeKey;
         SubjectProperties = subjectProperties;
+        IsRecord = isRecord;
+        ReconstructionConstructors = reconstructionConstructors;
         CanUseDerivedReconstruction = canUseDerivedReconstruction;
         Location = location;
     }

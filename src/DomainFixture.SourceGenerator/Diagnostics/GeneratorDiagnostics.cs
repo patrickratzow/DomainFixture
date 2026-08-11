@@ -38,8 +38,8 @@ internal static class GeneratorDiagnostics
 
     private static readonly DiagnosticDescriptor InaccessibleProperty = new(
         "DFG005",
-        "Generated test cannot mutate property",
-        "Property '{0}' must have an accessible setter for generated boundary tests",
+        "Generated boundary test cannot mutate property",
+        "Cannot generate the {2} boundary for '{0}.{1}': {3}",
         "DomainFixture.Generation",
         DiagnosticSeverity.Error,
         isEnabledByDefault: true);
@@ -131,8 +131,19 @@ internal static class GeneratorDiagnostics
     public static Diagnostic MissingSupportedRules(Location? location, string validationRulesType) =>
         Diagnostic.Create(NoSupportedRules, location, validationRulesType);
 
-    public static Diagnostic PropertySetterInaccessible(Location? location, string propertyName) =>
-        Diagnostic.Create(InaccessibleProperty, location, propertyName);
+    public static Diagnostic PropertyMutationUnavailable(
+        Location? location,
+        string subjectType,
+        string propertyName,
+        string ruleKind,
+        string reason) =>
+        Diagnostic.Create(
+            InaccessibleProperty,
+            location,
+            subjectType,
+            propertyName,
+            ruleKind,
+            reason);
 
     public static Diagnostic RecipeDuplicated(
         Location? location,

@@ -9,6 +9,8 @@ The `.verified.cs` files are the exact NUnit sources generated from:
 - `UsernameFixture.cs` and its centrally configured reconstruction strategy.
 - `QualifiedNameFixture.cs`, which proves that reconstruction preserves the untouched property of
   a two-property immutable value object.
+- `QualifiedHandleFixture.cs`, which proves that a sealed record uses `with` reconstruction and
+  preserves its other positional property.
 
 The test-project generation profile enables FluentValidation once for the assembly. Fixtures only
 provide their baseline; the generator matches the validator by subject type and emits the adapter

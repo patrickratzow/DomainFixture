@@ -25,7 +25,8 @@ public sealed class DomainGeneratedSuiteSnapshotTests
             File.ReadAllText(Path.Combine(sourceDirectory, "Inputs", "DomainFixtureProfile.cs")),
             File.ReadAllText(Path.Combine(sourceDirectory, "Inputs", "RegistrationRequestFixture.cs")),
             File.ReadAllText(Path.Combine(sourceDirectory, "Inputs", "UsernameFixture.cs")),
-            File.ReadAllText(Path.Combine(sourceDirectory, "Inputs", "QualifiedNameFixture.cs"))
+            File.ReadAllText(Path.Combine(sourceDirectory, "Inputs", "QualifiedNameFixture.cs")),
+            File.ReadAllText(Path.Combine(sourceDirectory, "Inputs", "QualifiedHandleFixture.cs"))
         };
         var compilation = CSharpCompilation.Create(
             $"DomainSnapshot_{Guid.NewGuid():N}",
@@ -60,7 +61,10 @@ public sealed class DomainGeneratedSuiteSnapshotTests
                 RelativePath: "Snapshots/DomainFixture.Tests.Domain/UsernameFixture.Validation.verified.cs"),
             (
                 HintName: "QualifiedNameFixture.Validation.g.cs",
-                RelativePath: "Snapshots/DomainFixture.Tests.Domain/QualifiedNameFixture.Validation.verified.cs")
+                RelativePath: "Snapshots/DomainFixture.Tests.Domain/QualifiedNameFixture.Validation.verified.cs"),
+            (
+                HintName: "QualifiedHandleFixture.Validation.g.cs",
+                RelativePath: "Snapshots/DomainFixture.Tests.Domain/QualifiedHandleFixture.Validation.verified.cs")
         };
 
         foreach (var expected in snapshots)

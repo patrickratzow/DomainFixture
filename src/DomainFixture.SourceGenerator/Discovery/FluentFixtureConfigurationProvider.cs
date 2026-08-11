@@ -192,6 +192,7 @@ internal static class FluentFixtureConfigurationProvider
             ? "DomainFixture.Generated"
             : configurationType.ContainingNamespace.ToDisplayString();
 
+        var subjectProperties = DiscoverProperties(subjectType, semanticModel.Compilation.Assembly);
         return new FixtureGenerationSpec(
             configurationType.Name,
             namespaceName,
@@ -201,7 +202,11 @@ internal static class FluentFixtureConfigurationProvider
             CreateFactoryExpression(baselineFactory),
             validatorFactory is null ? null : CreateFactoryExpression(validatorFactory),
             validationRulesType?.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat),
-            DiscoverProperties(subjectType, semanticModel.Compilation.Assembly),
+            subjectProperties,
+            subjectType is INamedTypeSymbol { IsRecord: true },
+            DiscoverReconstructionConstructors(
+                subjectType,
+                semanticModel.Compilation.Assembly),
             CanUseDerivedReconstruction(subjectType, semanticModel.Compilation.Assembly),
             outerInvocation.GetLocation());
     }
@@ -217,15 +222,20 @@ internal static class FluentFixtureConfigurationProvider
         {
             foreach (var property in current.GetMembers().OfType<IPropertySymbol>())
             {
-                if (!seenNames.Add(property.Name))
+                if (property.IsStatic || property.Parameters.Length != 0 || !seenNames.Add(property.Name))
                     continue;
+
+                var setterAccessible = IsAccessibleFromGeneratedCode(
+                    property.SetMethod,
+                    currentAssembly);
 
                 properties.Add(new SubjectPropertySpec(
                     property.Name,
                     property.Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat),
                     property.Type.SpecialType == SpecialType.System_String,
                     property.NullableAnnotation == NullableAnnotation.NotAnnotated,
-                    IsAccessibleFromGeneratedCode(property.SetMethod, currentAssembly),
+                    setterAccessible && property.SetMethod?.IsInitOnly != true,
+                    setterAccessible,
                     property.SetMethod is not null,
                     IsSetterAccessibleFromDerivedType(property.SetMethod, currentAssembly),
                     IsAccessibleFromGeneratedCode(property.GetMethod, currentAssembly)));
@@ -233,6 +243,67 @@ internal static class FluentFixtureConfigurationProvider
         }
 
         return properties.ToImmutable();
+    }
+
+    private static ImmutableArray<SubjectConstructorSpec> DiscoverReconstructionConstructors(
+        ITypeSymbol subjectType,
+        IAssemblySymbol currentAssembly)
+    {
+        if (subjectType is not INamedTypeSymbol namedType)
+            return ImmutableArray<SubjectConstructorSpec>.Empty;
+
+        var readableProperties = EnumerateProperties(namedType)
+            .Where(property =>
+                property.GetMethod is not null &&
+                IsAccessibleFromGeneratedCode(property.GetMethod, currentAssembly))
+            .ToArray();
+        var constructors = ImmutableArray.CreateBuilder<SubjectConstructorSpec>();
+
+        foreach (var constructor in namedType.InstanceConstructors.Where(constructor =>
+                     constructor.Parameters.Length > 0 &&
+                     IsAccessibleFromGeneratedCode(constructor, currentAssembly)))
+        {
+            var parameters = ImmutableArray.CreateBuilder<ConstructorParameterSpec>();
+            var matchedProperties = new HashSet<string>();
+            foreach (var parameter in constructor.Parameters)
+            {
+                var property = readableProperties.FirstOrDefault(candidate =>
+                    string.Equals(candidate.Name, parameter.Name, System.StringComparison.OrdinalIgnoreCase) &&
+                    SymbolEqualityComparer.Default.Equals(candidate.Type, parameter.Type));
+                if (property is null || !matchedProperties.Add(property.Name))
+                {
+                    parameters.Clear();
+                    break;
+                }
+
+                parameters.Add(new ConstructorParameterSpec(property.Name));
+            }
+
+            if (parameters.Count == constructor.Parameters.Length &&
+                matchedProperties.Count == readableProperties.Length)
+            {
+                constructors.Add(new SubjectConstructorSpec(parameters.ToImmutable()));
+            }
+        }
+
+        return constructors.ToImmutable();
+    }
+
+    private static IEnumerable<IPropertySymbol> EnumerateProperties(INamedTypeSymbol subjectType)
+    {
+        var seenNames = new HashSet<string>();
+        for (var current = subjectType; current is not null; current = current.BaseType)
+        {
+            foreach (var property in current.GetMembers().OfType<IPropertySymbol>())
+            {
+                if (!property.IsStatic &&
+                    property.Parameters.Length == 0 &&
+                    seenNames.Add(property.Name))
+                {
+                    yield return property;
+                }
+            }
+        }
     }
 
     private static bool CanUseDerivedReconstruction(
@@ -250,9 +321,8 @@ internal static class FluentFixtureConfigurationProvider
         }
 
         var properties = DiscoverProperties(subjectType, currentAssembly);
-        return properties
-            .Where(property => property.HasSetter)
-            .All(property =>
+        return properties.All(property =>
+                property.HasSetter &&
                 property.CanSetFromDerivedType &&
                 property.CanReadFromGeneratedCode);
     }

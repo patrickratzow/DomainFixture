@@ -7,6 +7,7 @@ internal sealed class SubjectPropertySpec
     public bool IsString { get; }
     public bool IsNonNullable { get; }
     public bool CanBeAssigned { get; }
+    public bool CanSetInObjectInitializer { get; }
     public bool HasSetter { get; }
     public bool CanSetFromDerivedType { get; }
     public bool CanReadFromGeneratedCode { get; }
@@ -17,6 +18,7 @@ internal sealed class SubjectPropertySpec
         bool isString,
         bool isNonNullable,
         bool canBeAssigned,
+        bool canSetInObjectInitializer,
         bool hasSetter,
         bool canSetFromDerivedType,
         bool canReadFromGeneratedCode)
@@ -26,6 +28,7 @@ internal sealed class SubjectPropertySpec
         IsString = isString;
         IsNonNullable = isNonNullable;
         CanBeAssigned = canBeAssigned;
+        CanSetInObjectInitializer = canSetInObjectInitializer;
         HasSetter = hasSetter;
         CanSetFromDerivedType = canSetFromDerivedType;
         CanReadFromGeneratedCode = canReadFromGeneratedCode;
