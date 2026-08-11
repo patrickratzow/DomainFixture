@@ -1,3 +1,4 @@
+using System.Collections.Immutable;
 using Microsoft.CodeAnalysis;
 
 namespace DomainFixture.SourceGenerator.Models;
@@ -12,6 +13,7 @@ internal sealed class FixtureGenerationSpec
     public string BaselineFactoryExpression { get; }
     public string ValidatorFactoryExpression { get; }
     public string ValidationRulesTypeKey { get; }
+    public ImmutableArray<SubjectPropertySpec> SubjectProperties { get; }
     public Location? Location { get; }
 
     public FixtureGenerationSpec(
@@ -23,6 +25,7 @@ internal sealed class FixtureGenerationSpec
         string baselineFactoryExpression,
         string validatorFactoryExpression,
         string validationRulesTypeKey,
+        ImmutableArray<SubjectPropertySpec> subjectProperties,
         Location? location)
     {
         ConfigurationName = configurationName;
@@ -33,6 +36,7 @@ internal sealed class FixtureGenerationSpec
         BaselineFactoryExpression = baselineFactoryExpression;
         ValidatorFactoryExpression = validatorFactoryExpression;
         ValidationRulesTypeKey = validationRulesTypeKey;
+        SubjectProperties = subjectProperties;
         Location = location;
     }
 }

@@ -15,20 +15,20 @@ internal static class FluentValidationRuleProvider
     {
         return context.SyntaxProvider
             .CreateSyntaxProvider(
-                static (node, _) => IsLengthInvocationCandidate(node),
+                static (node, _) => IsSupportedInvocationCandidate(node),
                 static (syntaxContext, cancellationToken) =>
                     ExtractRule(syntaxContext, cancellationToken))
             .Where(static result => result is not null)
             .Select(static (result, _) => result!);
     }
 
-    private static bool IsLengthInvocationCandidate(SyntaxNode node)
+    private static bool IsSupportedInvocationCandidate(SyntaxNode node)
     {
         return node is InvocationExpressionSyntax
         {
             Expression: MemberAccessExpressionSyntax
             {
-                Name.Identifier.ValueText: "Length"
+                Name.Identifier.ValueText: "Length" or "MaximumLength" or "NotEmpty" or "NotNull"
             }
         };
     }
@@ -46,18 +46,46 @@ internal static class FluentValidationRuleProvider
             return null;
         }
 
-        if (!TryReadLengthArguments(semanticModel, invocation, out var minimum, out var maximum) ||
-            !TryGetRuleProperty(semanticModel, invocation, out var property))
+        if (!TryGetRuleProperty(semanticModel, invocation, out var property))
         {
             return null;
         }
 
-        if (!HasAccessibleSetter(property))
+        var methodName = ((MemberAccessExpressionSyntax)invocation.Expression).Name.Identifier.ValueText;
+        var kind = methodName switch
         {
-            return RuleExtractionResult.Failure(
-                GeneratorDiagnostics.PropertySetterInaccessible(
-                    property.Locations.FirstOrDefault(),
-                    property.Name));
+            "Length" => ValidationRuleKind.StringLength,
+            "MaximumLength" => ValidationRuleKind.StringMaximumLength,
+            "NotEmpty" => ValidationRuleKind.NotEmpty,
+            "NotNull" => ValidationRuleKind.NotNull,
+            _ => (ValidationRuleKind?)null
+        };
+        if (kind is null)
+            return null;
+
+        int? minimum = null;
+        int? maximum = null;
+        if (kind == ValidationRuleKind.StringLength)
+        {
+            if (!TryReadLengthArguments(semanticModel, invocation, out var parsedMinimum, out var parsedMaximum) ||
+                parsedMinimum < 0 ||
+                parsedMaximum < parsedMinimum)
+            {
+                return null;
+            }
+
+            minimum = parsedMinimum;
+            maximum = parsedMaximum;
+        }
+        else if (kind == ValidationRuleKind.StringMaximumLength)
+        {
+            if (!TryReadSingleIntArgument(semanticModel, invocation, out var parsedMaximum) ||
+                parsedMaximum < 0)
+            {
+                return null;
+            }
+
+            maximum = parsedMaximum;
         }
 
         var validationRulesType = semanticModel.GetEnclosingSymbol(
@@ -69,10 +97,29 @@ internal static class FluentValidationRuleProvider
         return RuleExtractionResult.Success(new ValidationRuleSpec(
             validationRulesType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat),
             property.Name,
+            kind.Value,
             minimum,
             maximum,
             FindErrorCode(semanticModel, invocation),
+            HasAccessibleSetter(property),
             invocation.GetLocation()));
+    }
+
+    private static bool TryReadSingleIntArgument(
+        SemanticModel semanticModel,
+        InvocationExpressionSyntax invocation,
+        out int value)
+    {
+        value = 0;
+        if (invocation.ArgumentList.Arguments.Count < 1)
+            return false;
+
+        var constant = semanticModel.GetConstantValue(invocation.ArgumentList.Arguments[0].Expression);
+        if (!constant.HasValue || constant.Value is not int parsed)
+            return false;
+
+        value = parsed;
+        return true;
     }
 
     private static bool TryReadLengthArguments(
@@ -101,13 +148,12 @@ internal static class FluentValidationRuleProvider
 
     private static bool TryGetRuleProperty(
         SemanticModel semanticModel,
-        InvocationExpressionSyntax lengthInvocation,
+        InvocationExpressionSyntax validationInvocation,
         out IPropertySymbol property)
     {
         property = null!;
-        if (lengthInvocation.Expression is not MemberAccessExpressionSyntax lengthMember ||
-            lengthMember.Expression is not InvocationExpressionSyntax ruleForInvocation ||
-            !IsRuleForInvocation(ruleForInvocation) ||
+        var ruleForInvocation = FindRuleForInvocation(validationInvocation);
+        if (ruleForInvocation is null ||
             ruleForInvocation.ArgumentList.Arguments.Count == 0)
         {
             return false;
@@ -130,6 +176,22 @@ internal static class FluentValidationRuleProvider
         return true;
     }
 
+    private static InvocationExpressionSyntax? FindRuleForInvocation(
+        InvocationExpressionSyntax validationInvocation)
+    {
+        var current = validationInvocation;
+        while (current.Expression is MemberAccessExpressionSyntax memberAccess &&
+               memberAccess.Expression is InvocationExpressionSyntax previous)
+        {
+            if (IsRuleForInvocation(previous))
+                return previous;
+
+            current = previous;
+        }
+
+        return null;
+    }
+
     private static bool IsRuleForInvocation(InvocationExpressionSyntax invocation)
     {
         return invocation.Expression switch
@@ -142,22 +204,17 @@ internal static class FluentValidationRuleProvider
 
     private static string? FindErrorCode(
         SemanticModel semanticModel,
-        InvocationExpressionSyntax lengthInvocation)
+        InvocationExpressionSyntax validationInvocation)
     {
-        SyntaxNode current = lengthInvocation;
-        while (current.Parent is MemberAccessExpressionSyntax memberAccess &&
-               memberAccess.Expression == current &&
-               memberAccess.Parent is InvocationExpressionSyntax outerInvocation)
+        if (validationInvocation.Parent is MemberAccessExpressionSyntax memberAccess &&
+            memberAccess.Expression == validationInvocation &&
+            memberAccess.Name.Identifier.ValueText == "WithErrorCode" &&
+            memberAccess.Parent is InvocationExpressionSyntax outerInvocation &&
+            outerInvocation.ArgumentList.Arguments.Count > 0)
         {
-            if (memberAccess.Name.Identifier.ValueText == "WithErrorCode" &&
-                outerInvocation.ArgumentList.Arguments.Count > 0)
-            {
-                var value = semanticModel.GetConstantValue(
-                    outerInvocation.ArgumentList.Arguments[0].Expression);
-                return value.HasValue ? value.Value as string : null;
-            }
-
-            current = outerInvocation;
+            var value = semanticModel.GetConstantValue(
+                outerInvocation.ArgumentList.Arguments[0].Expression);
+            return value.HasValue ? value.Value as string : null;
         }
 
         return null;

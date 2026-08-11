@@ -31,7 +31,7 @@ internal static class GeneratorDiagnostics
     private static readonly DiagnosticDescriptor NoSupportedRules = new(
         "DFG004",
         "No supported validation rules were found",
-        "Validation rules type '{0}' contains no supported FluentValidation Length(minimum, maximum) rules",
+        "Validation rules type '{0}' produced no rules supported by the installed rule providers",
         "DomainFixture.Generation",
         DiagnosticSeverity.Error,
         isEnabledByDefault: true);
@@ -48,6 +48,46 @@ internal static class GeneratorDiagnostics
         "DFG006",
         "Fixture recipe is duplicated",
         "Fixture-test configuration '{0}' declares recipe '{1}' more than once",
+        "DomainFixture.Generation",
+        DiagnosticSeverity.Error,
+        isEnabledByDefault: true);
+
+    private static readonly DiagnosticDescriptor DuplicateGenerationProfile = new(
+        "DFG007",
+        "Generation profile is duplicated",
+        "Assembly declares more than one IFixtureGenerationProfile; keep one central generation profile",
+        "DomainFixture.Generation",
+        DiagnosticSeverity.Error,
+        isEnabledByDefault: true);
+
+    private static readonly DiagnosticDescriptor InvalidGenerationProfile = new(
+        "DFG008",
+        "Generation profile is invalid",
+        "Generation profile '{0}' must implement Configure with supported fluent configuration calls",
+        "DomainFixture.Generation",
+        DiagnosticSeverity.Error,
+        isEnabledByDefault: true);
+
+    private static readonly DiagnosticDescriptor ConflictingActivation = new(
+        "DFG009",
+        "Generation activation is ambiguous",
+        "Generation profile '{0}' selects both factory and service-provider activation",
+        "DomainFixture.Generation",
+        DiagnosticSeverity.Error,
+        isEnabledByDefault: true);
+
+    private static readonly DiagnosticDescriptor InvalidPropertyMutation = new(
+        "DFG010",
+        "Property reconstruction is invalid",
+        "Property reconstruction in generation profile '{0}' must select a property and an accessible static reconstruction method",
+        "DomainFixture.Generation",
+        DiagnosticSeverity.Error,
+        isEnabledByDefault: true);
+
+    private static readonly DiagnosticDescriptor DuplicatePropertyMutation = new(
+        "DFG011",
+        "Property reconstruction is duplicated",
+        "Generation profile '{0}' configures reconstruction for '{1}.{2}' more than once",
         "DomainFixture.Generation",
         DiagnosticSeverity.Error,
         isEnabledByDefault: true);
@@ -75,4 +115,28 @@ internal static class GeneratorDiagnostics
         string configurationName,
         string recipeName) =>
         Diagnostic.Create(DuplicateRecipe, location, configurationName, recipeName);
+
+    public static Diagnostic GenerationProfileDuplicated(Location? location) =>
+        Diagnostic.Create(DuplicateGenerationProfile, location);
+
+    public static Diagnostic GenerationProfileInvalid(Location? location, string profileName) =>
+        Diagnostic.Create(InvalidGenerationProfile, location, profileName);
+
+    public static Diagnostic GenerationActivationConflicting(Location? location, string profileName) =>
+        Diagnostic.Create(ConflictingActivation, location, profileName);
+
+    public static Diagnostic PropertyMutationInvalid(Location? location, string profileName) =>
+        Diagnostic.Create(InvalidPropertyMutation, location, profileName);
+
+    public static Diagnostic PropertyMutationDuplicated(
+        Location? location,
+        string profileName,
+        string subjectType,
+        string propertyName) =>
+        Diagnostic.Create(
+            DuplicatePropertyMutation,
+            location,
+            profileName,
+            subjectType,
+            propertyName);
 }

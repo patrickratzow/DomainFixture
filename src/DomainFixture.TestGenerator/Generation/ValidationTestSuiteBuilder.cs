@@ -92,6 +92,18 @@ public sealed class ValidationTestSuiteBuilder
 
     private static ExpressionStatementSyntax CreateMutation(PropertyMutationDescriptor mutation)
     {
+        if (mutation.ReconstructionFactory is not null)
+        {
+            return ExpressionStatement(
+                AssignmentExpression(
+                    SyntaxKind.SimpleAssignmentExpression,
+                    IdentifierName("subject"),
+                    InvocationExpression(mutation.ReconstructionFactory)
+                        .AddArgumentListArguments(
+                            Argument(IdentifierName("subject")),
+                            Argument(mutation.Value))));
+        }
+
         return ExpressionStatement(
             AssignmentExpression(
                 SyntaxKind.SimpleAssignmentExpression,

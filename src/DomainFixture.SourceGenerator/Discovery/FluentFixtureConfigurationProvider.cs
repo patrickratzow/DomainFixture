@@ -198,7 +198,38 @@ internal static class FluentFixtureConfigurationProvider
             CreateFactoryExpression(baselineFactory),
             CreateFactoryExpression(validatorFactory),
             validationRulesType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat),
+            DiscoverProperties(subjectType),
             outerInvocation.GetLocation());
+    }
+
+    private static ImmutableArray<SubjectPropertySpec> DiscoverProperties(ITypeSymbol subjectType)
+    {
+        var properties = ImmutableArray.CreateBuilder<SubjectPropertySpec>();
+        var seenNames = new HashSet<string>();
+
+        for (var current = subjectType as INamedTypeSymbol; current is not null; current = current.BaseType)
+        {
+            foreach (var property in current.GetMembers().OfType<IPropertySymbol>())
+            {
+                if (!seenNames.Add(property.Name))
+                    continue;
+
+                properties.Add(new SubjectPropertySpec(
+                    property.Name,
+                    property.Type.SpecialType == SpecialType.System_String,
+                    property.NullableAnnotation == NullableAnnotation.NotAnnotated,
+                    HasAccessibleSetter(property)));
+            }
+        }
+
+        return properties.ToImmutable();
+    }
+
+    private static bool HasAccessibleSetter(IPropertySymbol property)
+    {
+        return property.SetMethod?.DeclaredAccessibility is Accessibility.Public or
+            Accessibility.Internal or
+            Accessibility.ProtectedOrInternal;
     }
 
     private static IEnumerable<InvocationExpressionSyntax> EnumerateChain(
