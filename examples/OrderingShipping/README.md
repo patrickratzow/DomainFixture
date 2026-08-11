@@ -12,10 +12,12 @@ dotnet test examples/OrderingShipping/OrderingShipping.ExampleTests/OrderingShip
 
 The test project materializes source-generator output under `obj/Generated`. This makes generated
 factories and test suites navigable in IDEs after a build; for example, search that directory for
-`OrderFixture.Factory.g.cs`. The directory is refreshed before compilation so deleted recipes do
-not leave stale generated files. The files remain compiler output and should not be committed.
+`OrderFixture.Factory.g.cs`. `dotnet clean` removes the materialized directory, including output
+from deleted recipes. The files remain compiler output and should not be committed.
 
-The project currently runs 44 tests. DomainFixture generates most of the construction, equality, state, transition, rejection, and identity-preservation cases; the remaining tests describe event payloads and the end-to-end application workflow.
+The project currently runs 121 tests. DomainFixture generates the construction, equality, state, transition,
+rejection, and identity-preservation cases for the aggregate recipes; the handwritten tests describe
+event payloads, factory isolation, and the end-to-end application workflow.
 
 ## Architecture
 
@@ -35,6 +37,7 @@ OrderingShipping.Shipping
 OrderingShipping.ExampleTests
   DomainFixture profile and recipes
   generated specifications and typed fixture factories
+  small CQRS test host and generated command/query factories
   handwritten aggregate and cross-context workflow tests
 ```
 
@@ -86,14 +89,24 @@ than reusing a value. Explicit configured values still remain intentionally reus
 Explicit `options.Values().For<T>(...)` remains available when the domain has multiple meaningful
 choices, but it is an override—not required setup.
 
-The profile also enables `options.Conventions().AutoSynthesizeRecipes()`. Any recipe without an
-explicit `Baseline`, `Synthesize`, or `FromTransition` source therefore receives a synthesized
-valid baseline. Explicit sources always take precedence.
+The profile enables both automatic recipe synthesis and bounded domain discovery:
+
+```csharp
+options.Conventions()
+    .AutoSynthesizeRecipes()
+    .AutoDiscoverDomainTypes();
+```
+
+Any recipe without an explicit `Baseline`, `Synthesize`, or `FromTransition` source receives a
+synthesized valid baseline. `AutoDiscoverDomainTypes` follows readable properties and collection
+elements outward from those explicit fixture roots, creating implicit `Valid` recipes for
+constructible domain values. It does not scan the assembly for unrelated types, commands, queries,
+services, or DTOs. Explicit sources and fixtures always take precedence.
 
 Leaf value objects do not need empty fixture declarations. `ShippingAddress`, `DeliveryAddress`,
-and `OrderLine` are discovered and composed recursively while synthesizing their aggregate roots.
-A dedicated fixture is only useful when a type needs named recipes, generated behavioral tests, or
-a typed factory consumed directly by handwritten tests.
+`OrderLine`, their IDs, and their nested values are discovered from aggregate/request roots. They
+receive standalone `Valid` factories and generated domain-law tests automatically. A dedicated
+fixture is only useful when a type needs named recipes or other explicit behavior.
 
 The recipes remain focused on behavior:
 
@@ -131,7 +144,9 @@ arguments through the same valid-value pipeline, apply the transition, and retur
 fresh aggregate. Recipes can form an acyclic state graph; missing transitions and dependency
 cycles are reported as generation diagnostics.
 
-DomainFixture discovers `Create` factories and recursively builds the graph. For an Order this means a configured `OrderId`, `CustomerId`, `Sku`, and `Money`, a generated `ShippingAddress`, a generated `OrderLine`, and a generated one-element `IReadOnlyList<OrderLine>`.
+DomainFixture discovers `Create` factories and recursively builds the graph. For an Order this means
+fresh inferred `OrderId` and `CustomerId` values, an inferred `Sku` and `Money`, a generated
+`ShippingAddress`, a generated `OrderLine`, and a generated one-element `IReadOnlyList<OrderLine>`.
 
 The same recipe emits a typed factory for tests written by hand:
 
@@ -141,6 +156,24 @@ var pendingShipment = ShipmentFixtureFactory.Pending.Create();
 ```
 
 Every call produces a fresh aggregate. The example tests prove that mutating one generated instance does not affect the next.
+
+CQRS requests are deliberately opt-in rather than assembly-scanned. Each public command/query used
+as test input has a tiny source-less fixture such as:
+
+```csharp
+public sealed class PlaceOrderFixture : IFixtureTestConfiguration<PlaceOrder>
+{
+    public void Configure(IFixtureTestBuilder<PlaceOrder> fixture) =>
+        fixture.Recipe("Valid");
+}
+```
+
+That declaration produces `PlaceOrderFixtureFactory.Valid.Create()` and lets domain discovery handle
+its IDs, address, lines, SKU, money, and collection. Workflow tests create commands and queries
+directly from generated factories, using the transform overload only to correlate an ID across
+multiple requests. No aggregate-to-command projection helper or manual value graph remains. The
+test host owns repository and handler wiring, leaving each scenario focused on the command/event/query
+flow it proves.
 
 ## Production substitutions
 

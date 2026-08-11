@@ -23,6 +23,8 @@ public sealed class FixtureGenerationApiContractTests
             .Should().NotBeNull();
         typeof(IFixtureConventionOptions).GetMethod(nameof(IFixtureConventionOptions.AutoSynthesizeRecipes))
             .Should().NotBeNull();
+        typeof(IFixtureConventionOptions).GetMethod(nameof(IFixtureConventionOptions.AutoDiscoverDomainTypes))
+            .Should().NotBeNull();
 
         var rejectionMethods = typeof(IFixtureOperationOptions)
             .GetMethods();
@@ -68,6 +70,7 @@ public sealed class FixtureGenerationApiContractTests
                 result => result.Value);
         options.Conventions()
             .AutoSynthesizeRecipes()
+            .AutoDiscoverDomainTypes()
             .UseEntityIdentity();
         options.Values()
             .For<ExampleStatus>(() => ExampleStatus.Pending)

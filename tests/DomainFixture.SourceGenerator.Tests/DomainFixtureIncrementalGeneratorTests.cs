@@ -447,6 +447,26 @@ public class DomainFixtureIncrementalGeneratorTests
     }
 
     [Test]
+    public void Generator_ShouldDiscoverOnlyDomainTypesReachableFromExplicitRoots()
+    {
+        var result = RunGenerator(AutoDiscoveredDomainTypesSource, out var outputCompilation);
+
+        result.Diagnostics.Should().BeEmpty();
+        result.GeneratedTrees.Should().Contain(tree =>
+            tree.FilePath.EndsWith("AddressFixture.Factory.g.cs"));
+        result.GeneratedTrees.Should().Contain(tree =>
+            tree.FilePath.EndsWith("PostalCodeFixture.Factory.g.cs"));
+        result.GeneratedTrees.Should().NotContain(tree =>
+            tree.FilePath.EndsWith("UnrelatedCommandFixture.Factory.g.cs"));
+        result.GeneratedTrees.Single(tree => tree.FilePath.EndsWith(
+                "OrderFixture.Factory.g.cs")).ToString().Should()
+            .Contain("AddressFixtureFactory.Valid.Create()");
+        outputCompilation.GetDiagnostics()
+            .Where(diagnostic => diagnostic.Severity == DiagnosticSeverity.Error)
+            .Should().BeEmpty();
+    }
+
+    [Test]
     public void Generator_ShouldUnwrapGenericResultFactory_AndTestFailureBoundaries()
     {
         var result = RunGenerator(GenericResultRecipeSource, out var outputCompilation);
@@ -588,6 +608,33 @@ namespace Consumer
             fixture.Recipe(""Valid"")
                 .Synthesize();
         }
+    }
+}";
+
+    private const string AutoDiscoveredDomainTypesSource = @"
+using DomainFixture.Generation;
+
+namespace Example
+{
+    public sealed record PostalCode(string Value);
+    public sealed record Address(string Street, PostalCode PostalCode);
+    public sealed record Order(Address ShipTo);
+    public sealed record UnrelatedCommand(string Value);
+
+    public sealed class Profile : IFixtureGenerationProfile
+    {
+        public void Configure(IFixtureGenerationOptions options)
+        {
+            options.Conventions()
+                .AutoSynthesizeRecipes()
+                .AutoDiscoverDomainTypes();
+        }
+    }
+
+    public sealed class OrderFixture : IFixtureTestConfiguration<Order>
+    {
+        public void Configure(IFixtureTestBuilder<Order> fixture) =>
+            fixture.Recipe(""Valid"");
     }
 }";
 

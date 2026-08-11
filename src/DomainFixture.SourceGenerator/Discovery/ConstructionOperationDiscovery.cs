@@ -73,7 +73,54 @@ internal static class ConstructionOperationDiscovery
             }
         }
 
+        if (!operations.Any(operation =>
+                operation.KindId == DomainOperationKinds.StaticFactory))
+        {
+            var nonConventionalFactories = EnumerateFactoryCandidates(
+                    namedType,
+                    subjectType,
+                    currentAssembly)
+                .Where(method => !FactoryNames.Contains(method.Name))
+                .ToArray();
+            if (nonConventionalFactories.Length == 1)
+            {
+                var factory = nonConventionalFactories[0];
+                AddOperation(
+                    factory,
+                    DomainOperationKinds.StaticFactory,
+                    factory.ContainingType,
+                    subjectType,
+                    readableProperties,
+                    diagnostics,
+                    fallbackLocation,
+                    operations,
+                    operationKeys);
+            }
+        }
+
         return operations.ToImmutable();
+    }
+
+    private static IEnumerable<IMethodSymbol> EnumerateFactoryCandidates(
+        INamedTypeSymbol namedType,
+        ITypeSymbol subjectType,
+        IAssemblySymbol currentAssembly)
+    {
+        for (var current = namedType; current is not null; current = current.BaseType)
+        {
+            foreach (var method in current.GetMembers().OfType<IMethodSymbol>())
+            {
+                if (method.IsStatic &&
+                    method.MethodKind == MethodKind.Ordinary &&
+                    method.TypeParameters.Length == 0 &&
+                    method.Parameters.Length > 0 &&
+                    SymbolEqualityComparer.Default.Equals(method.ReturnType, subjectType) &&
+                    IsAccessibleFromGeneratedCode(method, currentAssembly))
+                {
+                    yield return method;
+                }
+            }
+        }
     }
 
     private static void AddOperation(

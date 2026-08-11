@@ -20,6 +20,13 @@ internal static class GeneratedTypeReferenceCollector
                      configuration.BaselineFactoryExpression,
                      @"global::(?:@?[A-Za-z_][A-Za-z0-9_]*\.)+@?[A-Za-z_][A-Za-z0-9_]*Factory\b"))
             yield return match.Value;
+        if (configuration.ValidatorFactoryExpression is not null)
+        {
+            foreach (Match match in Regex.Matches(
+                         configuration.ValidatorFactoryExpression,
+                         @"new\s+(?<type>global::(?:@?[A-Za-z_][A-Za-z0-9_]*\.)+@?[A-Za-z_][A-Za-z0-9_]*)\s*\("))
+                yield return match.Groups["type"].Value;
+        }
         yield return
             $"global::{configuration.NamespaceName}.{configuration.SubjectTypeShortName}{configuration.RecipeName}FluentValidationAdapter";
         yield return

@@ -26,14 +26,10 @@ public sealed class OrderDomainTests
     [Test]
     public void CancellingTwice_ShouldProtectTheAggregateLifecycle()
     {
-        var order = OrderFixtureFactory.Placed.Create();
-        order.PullDomainEvents();
-
-        order.Cancel("customer request");
+        var order = OrderFixtureFactory.Cancelled.Create();
 
         order.Status.Should().Be(OrderStatus.Cancelled);
-        order.DomainEvents.Should().ContainSingle()
-            .Which.Should().BeOfType<OrderCancelled>();
+        order.DomainEvents.OfType<OrderCancelled>().Should().ContainSingle();
         var secondCancellation = () => order.Cancel("again");
         secondCancellation.Should().Throw<InvalidOperationException>();
     }

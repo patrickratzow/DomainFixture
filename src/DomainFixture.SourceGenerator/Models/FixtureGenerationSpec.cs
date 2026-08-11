@@ -143,4 +143,32 @@ internal sealed class FixtureGenerationSpec
             StateExpectations,
             TransitionSource,
             InferredValues);
+
+    public FixtureGenerationSpec WithValidationAdapter(
+        string validatorFactoryExpression,
+        string validationRulesTypeKey) =>
+        new(
+            ConfigurationName,
+            NamespaceName,
+            RecipeName,
+            SubjectTypeName,
+            SubjectTypeShortName,
+            BaselineFactoryExpression,
+            validatorFactoryExpression,
+            validationRulesTypeKey,
+            SubjectProperties,
+            IsRecord,
+            ReconstructionConstructors,
+            CanUseDerivedReconstruction,
+            HasValueEqualitySemantics,
+            EquivalentCopyExpression,
+            ConstructionOperations,
+            Location,
+            CanExposePublicFactory,
+            Transitions,
+            IdentityMemberPath,
+            UsesSynthesizedBaseline,
+            StateExpectations,
+            TransitionSource,
+            InferredValues);
 }

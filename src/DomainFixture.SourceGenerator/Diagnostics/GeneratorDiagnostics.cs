@@ -364,6 +364,22 @@ internal static class GeneratorDiagnostics
         DiagnosticSeverity.Error,
         isEnabledByDefault: true);
 
+    private static readonly DiagnosticDescriptor InvalidCompileTimeModule = new(
+        "DFG046",
+        "Compile-time module metadata is invalid",
+        "Compile-time module '{0}' is invalid: {1}",
+        "DomainFixture.Generation",
+        DiagnosticSeverity.Error,
+        isEnabledByDefault: true);
+
+    private static readonly DiagnosticDescriptor InvalidCompileTimeModuleContribution = new(
+        "DFG047",
+        "Compile-time module contribution is invalid",
+        "Compile-time module contribution from '{0}' is invalid: {1}",
+        "DomainFixture.Generation",
+        DiagnosticSeverity.Error,
+        isEnabledByDefault: true);
+
     public static Diagnostic IncompleteConfiguration(Location? location, string configurationName) =>
         Diagnostic.Create(InvalidConfiguration, location, configurationName);
 
@@ -671,4 +687,20 @@ internal static class GeneratorDiagnostics
 
     public static Diagnostic ConfiguredValueDuplicated(Location? location, string typeName) =>
         Diagnostic.Create(DuplicateConfiguredValue, location, typeName);
+
+    public static Diagnostic CompileTimeModuleInvalid(
+        Location? location,
+        string moduleId,
+        string reason) =>
+        Diagnostic.Create(InvalidCompileTimeModule, location, moduleId, reason);
+
+    public static Diagnostic CompileTimeModuleContributionInvalid(
+        Location? location,
+        string moduleId,
+        string reason) =>
+        Diagnostic.Create(
+            InvalidCompileTimeModuleContribution,
+            location,
+            moduleId,
+            reason);
 }

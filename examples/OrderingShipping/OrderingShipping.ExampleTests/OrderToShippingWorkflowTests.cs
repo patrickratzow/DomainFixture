@@ -1,8 +1,9 @@
 using FluentAssertions;
 using NUnit.Framework;
+using OrderingShipping.ExampleTests.Generation;
+using OrderingShipping.ExampleTests.TestSupport;
 using OrderingShipping.Orders.Application;
 using OrderingShipping.Orders.Domain;
-using OrderingShipping.SharedKernel;
 using OrderingShipping.Shipping.Application;
 using OrderingShipping.Shipping.Domain;
 
@@ -14,82 +15,58 @@ public sealed class OrderToShippingWorkflowTests
     [Test]
     public void PlaceOrderCommand_ShouldCreateAQueryableShipmentThroughTheEventBoundary()
     {
-        var events = new DomainEventDispatcher();
-        var orders = new InMemoryOrderRepository();
-        var shipments = new InMemoryShipmentRepository();
-        var createShipment = new CreateShipmentHandler(shipments, events);
-        var shipmentId = ShipmentId.From(new Guid("30000000-0000-0000-0000-000000000404"));
+        var command = PlaceOrderFixtureFactory.Valid.Create();
+        var nextShipmentId = ShipmentIdFixtureFactory.Valid.Create();
+        var application = new OrderingShippingTestHost(nextShipmentId);
 
-        events.Subscribe(new CreateShipmentWhenOrderPlaced(
-            new FixedShipmentIdGenerator(shipmentId),
-            createShipment));
+        var result = application.PlaceOrder.Handle(command);
+        var orderQuery = GetOrderFixtureFactory.Valid.Create(query =>
+            query with { OrderId = command.OrderId });
+        var shipmentQuery = GetShipmentByOrderFixtureFactory.Valid.Create(query =>
+            query with { OrderId = command.OrderId.Value });
 
-        var placeOrder = new PlaceOrderHandler(orders, events);
-        var getOrder = new GetOrderHandler(orders);
-        var getShipment = new GetShipmentByOrderHandler(shipments);
-        var orderId = OrderId.From(new Guid("10000000-0000-0000-0000-000000000404"));
-
-        var result = placeOrder.Handle(new PlaceOrder(
-            orderId,
-            CustomerId.From(new Guid("20000000-0000-0000-0000-000000000404")),
-            ShippingAddress.Create("12 Domain Lane", "Copenhagen", "2100", "DK"),
-            new[] { OrderLine.Create(Sku.From("DDD-BOOK"), 2, Money.Usd(25m)) }));
-
-        result.Should().Be(orderId);
-        getOrder.Handle(new GetOrder(orderId)).Should().BeEquivalentTo(new
+        result.Should().Be(command.OrderId);
+        application.GetOrder.Handle(orderQuery).Should().BeEquivalentTo(new
         {
-            OrderId = orderId,
+            command.OrderId,
             Status = OrderStatus.Placed,
-            Total = 50m,
-            Currency = "USD",
-            LineCount = 1
+            Total = command.Lines.Sum(line => line.UnitPrice.Amount * line.Quantity),
+            Currency = command.Lines[0].UnitPrice.Currency,
+            LineCount = command.Lines.Count
         });
-        getShipment.Handle(new GetShipmentByOrder(orderId.Value)).Should().BeEquivalentTo(new
-        {
-            ShipmentId = shipmentId,
-            OrderId = orderId.Value,
-            Status = ShipmentStatus.Pending,
-            TrackingNumber = (string?)null
-        });
+        application.GetShipmentByOrder.Handle(shipmentQuery)
+            .Should().BeEquivalentTo(new
+            {
+                ShipmentId = nextShipmentId,
+                OrderId = command.OrderId.Value,
+                Status = ShipmentStatus.Pending,
+                TrackingNumber = (string?)null
+            });
     }
 
     [Test]
     public void ShippingCommands_ShouldAdvanceTheWriteModelAndItsQueryProjection()
     {
-        var events = new DomainEventDispatcher();
-        var shipments = new InMemoryShipmentRepository();
-        var shipmentId = ShipmentId.From(new Guid("30000000-0000-0000-0000-000000000405"));
-        var orderId = new Guid("10000000-0000-0000-0000-000000000405");
-        new CreateShipmentHandler(shipments, events).Handle(new CreateShipment(
-            shipmentId,
-            orderId,
-            DeliveryAddress.Create("12 Domain Lane", "Copenhagen", "2100", "DK")));
+        var create = CreateShipmentFixtureFactory.Valid.Create();
+        var dispatch = DispatchShipmentFixtureFactory.Valid.Create(command =>
+            command with { ShipmentId = create.ShipmentId });
+        var deliver = DeliverShipmentFixtureFactory.Valid.Create(command =>
+            command with { ShipmentId = create.ShipmentId });
+        var query = GetShipmentByOrderFixtureFactory.Valid.Create(request =>
+            request with { OrderId = create.OrderId });
+        var application = new OrderingShippingTestHost(create.ShipmentId);
 
-        new DispatchShipmentHandler(shipments, events).Handle(new DispatchShipment(
-            shipmentId,
-            TrackingNumber.From("TRACK-405")));
-        new DeliverShipmentHandler(shipments, events).Handle(new DeliverShipment(shipmentId));
+        application.CreateShipment.Handle(create);
+        application.DispatchShipment.Handle(dispatch);
+        application.DeliverShipment.Handle(deliver);
 
-        new GetShipmentByOrderHandler(shipments)
-            .Handle(new GetShipmentByOrder(orderId))
+        application.GetShipmentByOrder.Handle(query)
             .Should().BeEquivalentTo(new
             {
-                ShipmentId = shipmentId,
-                OrderId = orderId,
+                create.ShipmentId,
+                create.OrderId,
                 Status = ShipmentStatus.Delivered,
-                TrackingNumber = "TRACK-405"
+                TrackingNumber = dispatch.TrackingNumber.Value
             });
-    }
-
-    private sealed class FixedShipmentIdGenerator : IShipmentIdGenerator
-    {
-        private readonly ShipmentId _shipmentId;
-
-        public FixedShipmentIdGenerator(ShipmentId shipmentId)
-        {
-            _shipmentId = shipmentId;
-        }
-
-        public ShipmentId Next() => _shipmentId;
     }
 }

@@ -41,6 +41,9 @@ business meaning that source analysis cannot recover.
 
 ## External integrations
 
+The compile-time module SDK and analyzer packaging model are documented in
+[`compile-time-modules.md`](compile-time-modules.md).
+
 `DomainFixture.Contracts` is dependency-free and contains stable kind identifiers, versioned
 constraint and scenario envelopes, and deterministic provider-pipeline primitives. An external
 analyzer adapts its own domain framework into `DomainContractManifestAttribute` metadata and can
@@ -132,7 +135,8 @@ Assemblies that want synthesis to be the default can enable it once in their gen
 
 ```csharp
 options.Conventions()
-    .AutoSynthesizeRecipes();
+    .AutoSynthesizeRecipes()
+    .AutoDiscoverDomainTypes();
 ```
 
 With that convention, a source-less `fixture.Recipe("Valid");` is equivalent to explicitly calling
@@ -140,8 +144,15 @@ With that convention, a source-less `fixture.Recipe("Valid");` is equivalent to 
 explicit sources are still rejected. Without the convention, source-less recipes continue to emit
 `DFG001`.
 
-The valid-instance pipeline prefers an explicit baseline, then tries discovered constructors and
-`From`/`Create`/`Of` factories in stable order. Arguments come from intersected string and `Int32`
+`AutoDiscoverDomainTypes()` is bounded by explicit fixture roots. It follows readable domain
+properties, nullable values, arrays, and generic collection elements, then creates implicit `Valid`
+recipes for reachable constructible types. It intentionally does not scan assemblies for commands,
+queries, DTOs, services, or similarly named types. Application requests remain explicit opt-ins via
+a source-less recipe, after which their nested domain values use the same discovery graph.
+
+The valid-instance pipeline prefers an explicit baseline, then invariant-enforcing static factories,
+then accessible constructors. `From`/`Create`/`Of` are conventional factories; a sole unambiguous
+static factory such as `Money.Usd` is also eligible. Arguments come from intersected string and `Int32`
 constraints, deterministic bounded primitives, fresh `Guid` providers, assembly-wide unique strings,
 nested recipes, inferred value-object
 factories, and common arrays/lists.

@@ -8,6 +8,7 @@ public sealed class OrderingShippingProfile : IFixtureGenerationProfile
     {
         options.Conventions()
             .AutoSynthesizeRecipes()
+            .AutoDiscoverDomainTypes()
             .UseNullability()
             .UsePropertyNames()
             .UseImmutableObjects()

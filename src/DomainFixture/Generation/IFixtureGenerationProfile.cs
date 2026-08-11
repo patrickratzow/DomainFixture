@@ -69,6 +69,13 @@ public interface IFixtureConventionOptions
     /// </summary>
     IFixtureConventionOptions AutoSynthesizeRecipes();
 
+    /// <summary>
+    /// Creates implicit Valid recipes for constructible domain types reachable from an
+    /// explicitly configured subject. Discovery follows typed properties and collection
+    /// elements; it does not scan for unrelated application requests or services.
+    /// </summary>
+    IFixtureConventionOptions AutoDiscoverDomainTypes();
+
     IFixtureConventionOptions UseNullability();
 
     IFixtureConventionOptions UsePropertyNames();

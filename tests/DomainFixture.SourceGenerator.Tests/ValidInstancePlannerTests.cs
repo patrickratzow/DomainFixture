@@ -80,6 +80,27 @@ public sealed class ValidInstancePlannerTests
     }
 
     [Test]
+    public void Planner_ShouldPreferDomainFactoryOverAccessibleRecordConstructor()
+    {
+        var constructor = Operation(
+            DomainOperationKinds.Constructor,
+            new DomainOperationParameterContract("value", "global::System.String", "Value"));
+        var factory = Operation(
+            DomainOperationKinds.StaticFactory,
+            new DomainOperationParameterContract("value", "global::System.String", "Value"));
+        var type = TypeSpec(
+            ImmutableArray<DomainRecipeSpec>.Empty,
+            ImmutableArray.Create(Fact(constructor), Fact(factory)));
+
+        var result = ValidInstanceProviderPipeline.Resolve(
+            new ValidInstancePlanningRequest(type));
+
+        result.IsCovered.Should().BeTrue();
+        result.Plan!.ChosenOperation.Should().BeSameAs(factory);
+        result.Plan.Expression.Should().StartWith("global::Example.Person.From(");
+    }
+
+    [Test]
     public void Planner_ShouldExplainEveryUncoveredConstructionParameter()
     {
         var operation = Operation(

@@ -114,7 +114,10 @@ internal sealed class ConstructionSynthesisValidInstanceProvider :
             return ProviderDecision<ValidInstancePlanningResult>.NotHandled();
 
         var uncovered = new List<string>();
-        foreach (var operationFact in request.Type.ConstructionOperations)
+        // A named domain factory is the aggregate/value object's invariant boundary. Prefer it
+        // over an accessible constructor when both exist (records frequently expose both).
+        foreach (var operationFact in request.Type.ConstructionOperations.OrderBy(fact =>
+                     fact.Value.KindId == DomainOperationKinds.StaticFactory ? 0 : 1))
         {
             var operation = operationFact.Value;
             if (operation.KindId is not DomainOperationKinds.Constructor and not DomainOperationKinds.StaticFactory)

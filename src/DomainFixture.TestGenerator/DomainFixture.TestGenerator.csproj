@@ -10,4 +10,8 @@
       <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.0.1" />
     </ItemGroup>
 
+    <ItemGroup>
+      <ProjectReference Include="..\DomainFixture.Contracts\DomainFixture.Contracts.csproj" />
+    </ItemGroup>
+
 </Project>

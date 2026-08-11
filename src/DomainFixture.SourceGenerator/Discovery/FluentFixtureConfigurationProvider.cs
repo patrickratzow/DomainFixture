@@ -68,6 +68,11 @@ internal static class FluentFixtureConfigurationProvider
                 EnumerateChain(invocation).Any(candidate =>
                     IsGenerationMethod(semanticModel, candidate, "Recipe")))
             .Select(invocation => invocation!)
+            .Concat(configureDeclaration.ExpressionBody?.Expression is InvocationExpressionSyntax expressionBody &&
+                    EnumerateChain(expressionBody).Any(candidate =>
+                        IsGenerationMethod(semanticModel, candidate, "Recipe"))
+                ? new[] { expressionBody }
+                : System.Array.Empty<InvocationExpressionSyntax>())
             .ToArray();
         if (recipeChains.Length == 0)
         {
@@ -740,7 +745,7 @@ internal static class FluentFixtureConfigurationProvider
             : identifier;
     }
 
-    private static ImmutableArray<SubjectPropertySpec> DiscoverProperties(
+    internal static ImmutableArray<SubjectPropertySpec> DiscoverProperties(
         ITypeSymbol subjectType,
         IAssemblySymbol currentAssembly)
     {
@@ -774,7 +779,7 @@ internal static class FluentFixtureConfigurationProvider
         return properties.ToImmutable();
     }
 
-    private static ImmutableArray<SubjectConstructorSpec> DiscoverReconstructionConstructors(
+    internal static ImmutableArray<SubjectConstructorSpec> DiscoverReconstructionConstructors(
         ITypeSymbol subjectType,
         IAssemblySymbol currentAssembly)
     {
@@ -835,7 +840,7 @@ internal static class FluentFixtureConfigurationProvider
         }
     }
 
-    private static bool CanUseDerivedReconstruction(
+    internal static bool CanUseDerivedReconstruction(
         ITypeSymbol subjectType,
         IAssemblySymbol currentAssembly)
     {
@@ -856,7 +861,7 @@ internal static class FluentFixtureConfigurationProvider
                 property.CanReadFromGeneratedCode);
     }
 
-    private static bool HasValueEqualitySemantics(ITypeSymbol subjectType)
+    internal static bool HasValueEqualitySemantics(ITypeSymbol subjectType)
     {
         if (subjectType is not INamedTypeSymbol namedType)
             return false;
@@ -881,7 +886,7 @@ internal static class FluentFixtureConfigurationProvider
         return overridesEquals && overridesGetHashCode;
     }
 
-    private static bool CanExposePublicFactory(ITypeSymbol type)
+    internal static bool CanExposePublicFactory(ITypeSymbol type)
     {
         switch (type)
         {
@@ -906,7 +911,7 @@ internal static class FluentFixtureConfigurationProvider
         }
     }
 
-    private static string? DiscoverEquivalentCopyExpression(
+    internal static string? DiscoverEquivalentCopyExpression(
         ITypeSymbol subjectType,
         IAssemblySymbol currentAssembly,
         ImmutableArray<SubjectConstructorSpec> constructors)

@@ -16,9 +16,11 @@ internal sealed class GenerationProfileSpec
         ImmutableArray<OperationRejectionSpec>.Empty,
         ImmutableArray<OperationResultSpec>.Empty,
         ImmutableArray<ConfiguredValueSpec>.Empty,
-        autoSynthesizeRecipes: false);
+        autoSynthesizeRecipes: false,
+        autoDiscoverDomainTypes: false);
 
     public bool AutoSynthesizeRecipes { get; }
+    public bool AutoDiscoverDomainTypes { get; }
     public bool UseNullability { get; }
     public bool UsePropertyNames { get; }
     public bool UseImmutableObjects { get; }
@@ -43,9 +45,11 @@ internal sealed class GenerationProfileSpec
         ImmutableArray<OperationRejectionSpec> operationRejections,
         ImmutableArray<OperationResultSpec> operationResults = default,
         ImmutableArray<ConfiguredValueSpec> configuredValues = default,
-        bool autoSynthesizeRecipes = false)
+        bool autoSynthesizeRecipes = false,
+        bool autoDiscoverDomainTypes = false)
     {
         AutoSynthesizeRecipes = autoSynthesizeRecipes;
+        AutoDiscoverDomainTypes = autoDiscoverDomainTypes;
         UseNullability = useNullability;
         UsePropertyNames = usePropertyNames;
         UseImmutableObjects = useImmutableObjects;

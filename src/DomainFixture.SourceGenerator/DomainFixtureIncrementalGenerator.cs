@@ -1,9 +1,12 @@
+using System.Collections.Generic;
 using DomainFixture.SourceGenerator.Discovery;
 using DomainFixture.SourceGenerator.Emission;
 using DomainFixture.SourceGenerator.Extraction;
 using DomainFixture.SourceGenerator.Generation;
 using DomainFixture.SourceGenerator.Models;
 using DomainFixture.SourceGenerator.Normalization;
+using DomainFixture.TestGenerator.Modules;
+using DomainFixture.Contracts;
 using System.Collections.Immutable;
 using System.Linq;
 using Microsoft.CodeAnalysis;
@@ -20,6 +23,7 @@ public sealed class DomainFixtureIncrementalGenerator : IIncrementalGenerator
         var constraintProviders = DomainConstraintProviderCatalog.Create(context);
         var scenarioResults = DomainScenarioManifestProvider.Create(context);
         var operationManifests = DomainOperationManifestProvider.Create(context);
+        var moduleManifests = DomainFixtureModuleManifestProvider.Create(context);
 
         context.RegisterSourceOutput(configurations, static (productionContext, result) =>
         {
@@ -80,6 +84,26 @@ public sealed class DomainFixtureIncrementalGenerator : IIncrementalGenerator
                 ReportOperationManifestFailure(productionContext, failure);
         });
 
+        context.RegisterSourceOutput(moduleManifests, static (productionContext, catalog) =>
+        {
+            foreach (var issue in catalog.Issues)
+            {
+                var diagnostic = issue.Kind is
+                    CompileTimeModuleIssueKind.UnsupportedModuleSchema or
+                    CompileTimeModuleIssueKind.InvalidModule or
+                    CompileTimeModuleIssueKind.ConflictingModule
+                        ? Diagnostics.GeneratorDiagnostics.CompileTimeModuleInvalid(
+                            location: null,
+                            issue.ModuleId,
+                            issue.Message)
+                        : Diagnostics.GeneratorDiagnostics.CompileTimeModuleContributionInvalid(
+                            location: null,
+                            issue.ModuleId,
+                            issue.Message);
+                productionContext.ReportDiagnostic(diagnostic);
+            }
+        });
+
         context.RegisterSourceOutput(
             constraintProviders.SourceResults,
             static (productionContext, results) =>
@@ -102,19 +126,75 @@ public sealed class DomainFixtureIncrementalGenerator : IIncrementalGenerator
             .Combine(generationProfile)
             .Combine(constraints)
             .Combine(scenarios)
-            .Combine(operationManifests);
+            .Combine(operationManifests)
+            .Combine(moduleManifests)
+            .Combine(context.CompilationProvider);
 
         context.RegisterSourceOutput(allGenerationInputs, static (productionContext, input) =>
         {
-            var parsedConfigurations = input.Left.Left.Left.Left;
-            var profileResult = input.Left.Left.Left.Right;
-            var constraints = input.Left.Left.Right;
-            var scenarios = input.Left.Right;
-            var manifests = input.Right;
-            var configurations = ApplyRecipeSynthesisDefaults(
+            var generationInput = input.Left;
+            var compilation = input.Right;
+            var domainInput = generationInput.Left;
+            var moduleCatalog = generationInput.Right;
+            CompileTimeModuleCatalogEmitter.Emit(productionContext, moduleCatalog);
+            var parsedConfigurations = domainInput.Left.Left.Left.Left;
+            var profileResult = domainInput.Left.Left.Left.Right;
+            var constraints = domainInput.Left.Left.Right;
+            var scenarios = domainInput.Left.Right;
+            var manifests = domainInput.Right;
+            var reportedModuleCapabilities = new HashSet<string>(System.StringComparer.Ordinal);
+            constraints = constraints.Where(constraint => IsModuleContributionAllowed(
+                    productionContext,
+                    moduleCatalog,
+                    constraint.Contract.SourceTypeName,
+                    DomainFixtureModuleCapabilities.Constraints,
+                    reportedModuleCapabilities))
+                .ToImmutableArray();
+            scenarios = scenarios.Where(scenario => IsModuleContributionAllowed(
+                    productionContext,
+                    moduleCatalog,
+                    scenario.Contract.SourceTypeName,
+                    DomainFixtureModuleCapabilities.Scenarios,
+                    reportedModuleCapabilities))
+                .ToImmutableArray();
+            manifests = new DomainOperationManifestExtraction(
+                manifests.Operations.Where(operation => IsModuleContributionAllowed(
+                        productionContext,
+                        moduleCatalog,
+                        operation.SourceTypeName,
+                        DomainFixtureModuleCapabilities.Operations,
+                        reportedModuleCapabilities))
+                    .ToImmutableArray(),
+                manifests.Outcomes.Where(outcome => IsModuleContributionAllowed(
+                        productionContext,
+                        moduleCatalog,
+                        outcome.SourceTypeName,
+                        DomainFixtureModuleCapabilities.OperationOutcomes,
+                        reportedModuleCapabilities))
+                    .ToImmutableArray(),
+                manifests.Failures);
+            var explicitConfigurations = ApplyRecipeSynthesisDefaults(
                 productionContext,
                 parsedConfigurations,
                 profileResult.Profile);
+            var contributedConfigurations =
+                ImplicitFixtureConfigurationDiscovery.DiscoverContributedRecipes(
+                    compilation,
+                    explicitConfigurations,
+                    moduleCatalog.Recipes);
+            foreach (var diagnostic in contributedConfigurations.Diagnostics)
+                productionContext.ReportDiagnostic(diagnostic);
+            var rootConfigurations = explicitConfigurations.AddRange(
+                contributedConfigurations.Configurations);
+            var implicitConfigurations = ImplicitFixtureConfigurationDiscovery.Discover(
+                compilation,
+                rootConfigurations,
+                profileResult.Profile);
+            foreach (var diagnostic in implicitConfigurations.Diagnostics)
+                productionContext.ReportDiagnostic(diagnostic);
+            var configurations = ApplyModuleValidationAdapters(
+                rootConfigurations.AddRange(implicitConfigurations.Configurations),
+                moduleCatalog.Validations);
             var discovered = DomainSpecNormalizer.Normalize(
                 configurations,
                 profileResult.Profile,
@@ -223,6 +303,28 @@ public sealed class DomainFixtureIncrementalGenerator : IIncrementalGenerator
             $"global::{configuration.NamespaceName}.{configuration.ConfigurationName}Factory.{recipeIdentifier}.Create()");
     }
 
+    private static ImmutableArray<FixtureGenerationSpec> ApplyModuleValidationAdapters(
+        ImmutableArray<FixtureGenerationSpec> configurations,
+        ImmutableArray<CompileTimeValidationContribution> validations)
+    {
+        if (validations.IsEmpty)
+            return configurations;
+
+        return configurations.Select(configuration =>
+        {
+            if (configuration.ValidatorFactoryExpression is not null)
+                return configuration;
+
+            var validation = validations.FirstOrDefault(candidate =>
+                candidate.SubjectTypeName == configuration.SubjectTypeName);
+            return validation is null
+                ? configuration
+                : configuration.WithValidationAdapter(
+                    $"new {validation.AdapterTypeName}()",
+                    validation.SourceTypeName);
+        }).ToImmutableArray();
+    }
+
     private static void ReportOperationManifestFailure(
         SourceProductionContext context,
         DomainOperationManifestFailure failure)
@@ -261,5 +363,37 @@ public sealed class DomainFixtureIncrementalGenerator : IIncrementalGenerator
                 failure.Message)
         };
         context.ReportDiagnostic(diagnostic);
+    }
+
+    private static bool IsModuleContributionAllowed(
+        SourceProductionContext context,
+        CompileTimeModuleCatalog catalog,
+        string sourceTypeName,
+        string capability,
+        ISet<string> reported)
+    {
+        var resolution = catalog.ResolveCapability(sourceTypeName, capability);
+        if (resolution.Status is
+            CompileTimeModuleCapabilityStatus.Unregistered or
+            CompileTimeModuleCapabilityStatus.Supported)
+        {
+            return true;
+        }
+
+        var diagnosticKey = sourceTypeName + "|" + capability;
+        if (reported.Add(diagnosticKey))
+        {
+            var moduleId = resolution.Module?.ModuleId ?? sourceTypeName;
+            var reason = resolution.Status == CompileTimeModuleCapabilityStatus.MissingCapability
+                ? $"source '{sourceTypeName}' contributed '{capability}', but module '{moduleId}' did not declare that capability"
+                : $"source '{sourceTypeName}' is claimed by multiple compile-time modules";
+            context.ReportDiagnostic(
+                Diagnostics.GeneratorDiagnostics.CompileTimeModuleContributionInvalid(
+                    location: null,
+                    moduleId,
+                    reason));
+        }
+
+        return false;
     }
 }

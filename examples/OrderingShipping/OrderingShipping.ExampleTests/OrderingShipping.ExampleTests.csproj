@@ -34,7 +34,7 @@
     <ProjectReference Include="..\OrderingShipping.Shipping\OrderingShipping.Shipping.csproj" />
   </ItemGroup>
 
-  <Target Name="CleanMaterializedCompilerGeneratedFiles" BeforeTargets="CoreCompile">
+  <Target Name="CleanMaterializedCompilerGeneratedFiles" AfterTargets="Clean">
     <RemoveDir Directories="$(CompilerGeneratedFilesOutputPath)" />
   </Target>
 

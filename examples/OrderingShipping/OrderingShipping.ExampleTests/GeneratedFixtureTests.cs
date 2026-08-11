@@ -33,15 +33,17 @@ public sealed class GeneratedFixtureTests
     public void GeneratedScenarioFactories_ShouldStayIsolated()
     {
         var pending = ShipmentFixtureFactory.Pending.Create();
+        var dispatched = ShipmentFixtureFactory.Dispatched.Create();
         var delivered = ShipmentFixtureFactory.Delivered.Create();
 
         pending.Status.Should().Be(ShipmentStatus.Pending);
+        dispatched.Status.Should().Be(ShipmentStatus.Dispatched);
         delivered.Status.Should().Be(ShipmentStatus.Delivered);
 
-        pending.Dispatch(TrackingNumber.From("TRACK-HANDWRITTEN"));
+        dispatched.Deliver();
 
-        pending.Status.Should().Be(ShipmentStatus.Dispatched);
-        ShipmentFixtureFactory.Pending.Create().Status.Should().Be(ShipmentStatus.Pending);
+        dispatched.Status.Should().Be(ShipmentStatus.Delivered);
+        ShipmentFixtureFactory.Dispatched.Create().Status.Should().Be(ShipmentStatus.Dispatched);
     }
 
     [Test]
